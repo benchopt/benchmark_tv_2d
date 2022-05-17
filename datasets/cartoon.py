@@ -3,19 +3,18 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
+    from PIL import Image
     from scipy.signal import fftconvolve
 
 
 class Dataset(BaseDataset):
 
-    name = "Simulated"
+    name = "Cartoon"
 
     # List of parameters to generate the datasets. The benchmark will consider
     # the cross product for each key in the dictionary.
-    # cos + bruit ~ N(mu, sigma)
+    # A * I + bruit ~ N(mu, sigma)
     parameters = {
-        'sigma': [0.1],
-        'mu': [0],
         'K': [50],
         'type_A': ['identity', 'diagonal', 'triangular', 'random']}
 
@@ -40,12 +39,17 @@ class Dataset(BaseDataset):
         return A
 
     def get_data(self):
-        t = np.arange(self.K)
+        height = 500
+        width = 500
         rng = np.random.RandomState(47)
-        y = np.cos(np.pi*t/self.K*10) + np.zeros((self.K, self.K))
+        y = np.array(
+            Image.open('/mnt/share/\
+            cartoon/01.RamShootsDemons_gray.png'))[:height, :width]
+        mu = np.mean(y)
+        sigma = np.std(y)
         A = self.set_A(rng)
         y_blurred = fftconvolve(y, A, mode="same") + \
-            rng.normal(self.mu, self.sigma, size=(self.K, self.K))
+            rng.normal(mu, sigma, size=(height, width))
         data = dict(A=A, y=y_blurred)
 
-        return y_blurred .shape[0], data
+        return y_blurred.shape[0], data
