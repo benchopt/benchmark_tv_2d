@@ -8,10 +8,12 @@ with safe_import_context() as import_ctx:
 class Objective(BaseObjective):
     name = "Total Variation 2D"
 
-    parameters = {'reg': [0.5]}
+    parameters = {'reg': [0.5],
+                  'isotropy': ["anisotropic", "isotropic", "split"]}
 
-    def __init__(self, reg=0.5):
-        self.reg = reg  # 0<reg<1
+    def __init__(self, reg=0.5, isotropy="anisotropic"):
+        self.reg = reg
+        self.isotropy = isotropy
 
     def set_data(self, lin_op, y):
         self.lin_op = lin_op
@@ -19,13 +21,20 @@ class Objective(BaseObjective):
         self.reg = self.reg
 
     def compute(self, u):
-        # fftconvolve(u, self.A, mode="same")
         residual = self.y - self.lin_op(u)
-        return .5 * np.linalg.norm(residual) ** 2 + \
-            self.reg * self.isotropic_tv_value(u)
+        lsq = .5 * np.linalg.norm(residual) ** 2
+        if self.isotropy == "isotropic":
+            return lsq + \
+                self.reg * self.isotropic_tv_value(u)
+        else:                   # just aniso for the moment
+            return lsq + \
+                self.reg * self.anisotropic_tv_value(u)
 
     def to_dict(self):
-        return dict(lin_op=self.lin_op, reg=self.reg, y=self.y)
+        return dict(lin_op=self.lin_op,
+                    reg=self.reg,
+                    y=self.y,
+                    isotropy=self.isotropy)
 
     def isotropic_tv_value(self, u):
         return np.sqrt(

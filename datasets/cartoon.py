@@ -3,15 +3,15 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
-    from PIL import Image
+    from scipy import misc
     from scipy.signal import fftconvolve
     from scipy.signal.windows import gaussian
 
 
 GAUSSIAN_FILTER = np.outer(
-    gaussian(64, 8),
-    gaussian(64, 8))
-GAUSSIAN_FILTER /= np.linalg.norm(GAUSSIAN_FILTER, ord=2)
+    gaussian(40, 8),
+    gaussian(40, 8))
+GAUSSIAN_FILTER /= GAUSSIAN_FILTER.sum()
 
 
 def blur_2d(u):
@@ -38,6 +38,7 @@ class Dataset(BaseDataset):
     # the cross product for each key in the dictionary.
     # A * I + bruit ~ N(mu, sigma)
     parameters = {
+        'std_noise': [0.3],
         'scenario': ['denoising', 'deblurring']}
 
     def __init__(self, std_noise=0.3,
@@ -55,9 +56,8 @@ class Dataset(BaseDataset):
         return lin_op
 
     def get_data(self):
-        rng = np.random.RandomState(47)
-        img = np.array(
-            Image.open('img.png')).mean(axis=2)
+        rng = np.random.RandomState(self.random_state)
+        img = misc.face(gray=True)[::4, ::4]
         height, width = img.shape
         lin_op = self.set_lin_op()
         y_degraded = lin_op(img) + \
