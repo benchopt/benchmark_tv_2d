@@ -3,12 +3,11 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
-    from scipy.signal import fftconvolve
     import prox_tv as ptv
 
 
 class Solver(BaseSolver):
-    """Proximal gradient descent for analysis formulation."""
+    """Primal forward-backward for anisoTV using prox-tv."""
     name = 'PGD'
 
     install_cmd = 'conda'
@@ -16,21 +15,33 @@ class Solver(BaseSolver):
 
     stopping_strategy = "callback"
 
-    # any parameter defined here is accessible as a class attribute
+    parameters = {'prox_tv_method': [
+        "dr",
+        "pd",
+        "yang",
+        "condat",
+        "chambolle-pock",
+        "kolmogorov"
+    ]}
 
-    def set_objective(self, A, reg, y):
+    def set_objective(self, lin_op, reg, y, isotropy):
         self.reg = reg
-        self.A, self.y = A, y
+        self.isotropy = isotropy
+        self.lin_op, self.y = lin_op, y
+
+    def skip(self, lin_op, reg, y, isotropy):
+        if isotropy != "anisotropic":
+            return True, "prox-tv supports only anisoTV"
+        return False, None
 
     def run(self, callback):
-        stepsize = 1 / (np.linalg.norm(self.A, ord=2)**2)  # 1/ rho
-        # initialisation
-        u = np.zeros((self.y.shape[0], self.y.shape[1]))
+        n, m = self.y.shape[0], self.y.shape[1]
+        u = np.zeros((n, m))
+        stepsize = 1. / (self.lin_op.norm ** 2)
         while callback(u):
-            u = ptv.tv1_2d(u - stepsize * fftconvolve(fftconvolve(u, self.A,
-                           mode="same") - self.y, self.A[:, ::-1],
-                           mode="same"),
-                           self.reg * stepsize, method='condat')
+            u = ptv.tv1_2d(
+                u - stepsize * self.lin_op.T(self.lin_op(u) - self.y),
+                self.reg * stepsize, method=self.prox_tv_method)
         self.u = u
 
     def get_result(self):
