@@ -84,5 +84,5 @@ class Solver(BaseSolver):
 
     def _dual_prox_tv_iso(self, vh, vv):
         norms = np.sqrt(vh ** 2 + vv ** 2)
-        factors = 1. / np.maximum(1, norms)
+        factors = 1. / np.maximum(1, 1./self.reg * norms)
         return vh * factors, vv * factors
