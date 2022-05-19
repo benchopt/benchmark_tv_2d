@@ -41,6 +41,7 @@ class Dataset(BaseDataset):
                  random_state=27):
         # Store the parameters of the dataset
         self.std_noise = std_noise
+        self.size_blur = size_blur
         self.std_blur = std_blur
         self.random_state = random_state
 
