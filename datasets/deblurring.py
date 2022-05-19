@@ -37,7 +37,7 @@ class Dataset(BaseDataset):
     }
 
     def __init__(self, std_noise=0.3,
-                 size_blur=40, std_blur=8.,
+                 size_blur=27, std_blur=8.,
                  random_state=27):
         # Store the parameters of the dataset
         self.std_noise = std_noise
