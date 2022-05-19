@@ -20,7 +20,7 @@ class Solver(BaseSolver):
                   "theta": [1.0]}
 
     def skip(self, lin_op, reg, y, isotropy):
-        if isotropy not in ["anisotropic","isotropic"]:
+        if isotropy not in ["anisotropic", "isotropic"]:
             return True, "Only aniso and isoTV are implemented yet"
         return False, None
 
@@ -64,8 +64,12 @@ class Solver(BaseSolver):
         return self.u
 
     def _div(self, vh, vv):
-        dh = np.vstack((np.diff(vh, prepend=0, axis=0)[:-1,:], -vh[-1,:]))
-        dv = np.column_stack((np.diff(vv, prepend=0, axis=1)[:,:-1], -vv[:,-1]))
+        dh = np.vstack(
+            (np.diff(vh, prepend=0, axis=0)[:-1, :], -vh[-1, :])
+        )
+        dv = np.column_stack(
+            (np.diff(vv, prepend=0, axis=1)[:, :-1], -vv[:, -1])
+        )
         return dh + dv
 
     def _grad(self, u):
