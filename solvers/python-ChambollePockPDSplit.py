@@ -20,8 +20,8 @@ class Solver(BaseSolver):
                   "theta": [1.0]}
 
     def skip(self, lin_op, reg, y, isotropy):
-        if isotropy != "anisotropic":
-            return True, "Only anisoTV is implemented yet"
+        if isotropy not in ["anisotropic","isotropic"]:
+            return True, "Only aniso and isoTV are implemented yet"
         return False, None
 
     def set_objective(self, lin_op, reg, y, isotropy):
@@ -39,16 +39,20 @@ class Solver(BaseSolver):
         # Init variables
         n, m = self.y.shape
         u = np.zeros((n, m))
-        vh = np.zeros((n - 1, m))  # we consider non-cyclic finite difference
-        vv = np.zeros((n, m - 1))
+        vh = np.zeros((n, m))  # we consider non-cyclic finite difference
+        vv = np.zeros((n, m))
         w = np.zeros((n, m))
         u_bar = u
+        proj = {
+            'anisotropic': self._dual_prox_tv_aniso,
+            'isotropic': self._dual_prox_tv_iso,
+        }.get(self.isotropy, self._dual_prox_tv_aniso)
 
         while callback(u):
             u_old = u
             gh, gv = self._grad(u_bar)
-            vh, vv = self._dual_prox_tv_aniso(vh + sigma_v * gh,
-                                              vv + sigma_v * gv)
+            vh, vv = proj(vh + sigma_v * gh,
+                          vv + sigma_v * gv)
             w_tmp = w + sigma_w * self.lin_op(u_bar)
             w = (w_tmp - sigma_w * self.y) / (1.0 + sigma_w)
             # grad.T = -div, hence + sign
@@ -73,3 +77,8 @@ class Solver(BaseSolver):
     def _dual_prox_tv_aniso(self, vh, vv):
         return np.clip(vh, -self.reg, self.reg), \
             np.clip(vv, -self.reg, self.reg)
+
+    def _dual_prox_tv_iso(self, vh, vv):
+        norms = np.sqrt(vh ** 2 + vv ** 2)
+        factors = 1. / np.maximum(1, norms)
+        return vh * factors, vv * factors
