@@ -32,7 +32,7 @@ class Dataset(BaseDataset):
     # A * I + bruit ~ N(mu, sigma)
     parameters = {
         'std_noise': [0.3],
-        'size_blur': [40],
+        'size_blur': [27],
         'std_blur': [8.],
     }
 
