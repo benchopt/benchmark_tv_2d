@@ -65,10 +65,10 @@ class Solver(BaseSolver):
 
     def _div(self, vh, vv):
         dh = np.vstack(
-            (np.diff(vh, prepend=0, axis=0)[:-1, :], -vh[-1, :])
+            (np.diff(vh, prepend=0, axis=0)[:-1, :], -vh[-2, :])
         )
         dv = np.column_stack(
-            (np.diff(vv, prepend=0, axis=1)[:, :-1], -vv[:, -1])
+            (np.diff(vv, prepend=0, axis=1)[:, :-1], -vv[:, -2])
         )
         return dh + dv
 
