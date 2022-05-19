@@ -18,7 +18,7 @@ def test_blur_operator_norm():
     blur = make_blur(27, 3.)
     q = rng.normal(0, 1., size=(256, 128))
     # Power method
-    for i in range(10000):
+    for i in range(100):
         z = blur(q)
         q = z / np.sqrt(np.sum(z*z))
         mu = np.sum(np.diag(q.T @ blur(q)))
