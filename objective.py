@@ -8,10 +8,10 @@ with safe_import_context() as import_ctx:
 class Objective(BaseObjective):
     name = "Total Variation 2D"
 
-    parameters = {'reg': [0.5],
+    parameters = {'reg': [0.02],
                   'isotropy': ["anisotropic", "isotropic", "split"]}
 
-    def __init__(self, reg=0.5, isotropy="anisotropic"):
+    def __init__(self, reg=0.02, isotropy="anisotropic"):
         self.reg = reg
         self.isotropy = isotropy
 
