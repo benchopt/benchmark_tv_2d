@@ -26,7 +26,7 @@ class Objective(BaseObjective):
         if self.isotropy == "isotropic":
             return lsq + \
                 self.reg * self.isotropic_tv_value(u)
-        else:                   # just aniso for the moment
+        else:
             return lsq + \
                 self.reg * self.anisotropic_tv_value(u)
 
@@ -37,10 +37,15 @@ class Objective(BaseObjective):
                     isotropy=self.isotropy)
 
     def isotropic_tv_value(self, u):
-        return np.sqrt(
-            ((np.diff(u, axis=0))**2).sum() +
-            ((np.diff(u, axis=1))**2).sum())
+        gh, gv = self.grad(u)
+        return (np.sqrt(gh ** 2 + gv ** 2)).sum()
 
     def anisotropic_tv_value(self, u):
-        return np.abs(np.diff(u, axis=0)).sum() +\
-            np.abs(np.diff(u, axis=1)).sum()
+        gh, gv = self.grad(u)
+        return (np.abs(gh) + np.abs(gv)).sum()
+
+    def grad(self, u):
+        # Neumann condition
+        gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
+        gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
+        return gh, gv
