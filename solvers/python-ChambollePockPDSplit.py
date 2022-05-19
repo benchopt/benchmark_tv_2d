@@ -60,11 +60,15 @@ class Solver(BaseSolver):
         return self.u
 
     def _div(self, vh, vv):
-        return np.diff(vh, prepend=0, append=0, axis=0) +\
-            np.diff(vv, prepend=0, append=0, axis=1)
+        dh = np.vstack((np.diff(vh, prepend=0, axis=0)[:-1,:], -vh[-1,:]))
+        dv = np.column_stack((np.diff(vv, prepend=0, axis=1)[:,:-1], -vv[:,-1]))
+        return dh + dv
 
     def _grad(self, u):
-        return np.diff(u, axis=0), np.diff(u, axis=1)
+        # Neumann condition
+        gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
+        gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
+        return gh, gv
 
     def _dual_prox_tv_aniso(self, vh, vv):
         return np.clip(vh, -self.reg, self.reg), \
