@@ -34,7 +34,10 @@ identity.norm = 1.
 
 class Dataset(BaseDataset):
 
-    name = "Cartoon"
+    name = "simulated"
+
+    install_cmd = 'conda'
+    requirements = ['pip:download']
 
     # List of parameters to generate the datasets. The benchmark will consider
     # the cross product for each key in the dictionary.
