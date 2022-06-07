@@ -62,4 +62,4 @@ class Dataset(BaseDataset):
             rng.normal(0, self.std_noise, size=(height, width))
         data = dict(lin_op=lin_op, y=y_degraded)
 
-        return y_degraded.shape[0], data
+        return data

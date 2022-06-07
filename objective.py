@@ -6,7 +6,7 @@ with safe_import_context() as import_ctx:
 
 
 class Objective(BaseObjective):
-    name = "Total Variation 2D"
+    name = "TV2D"
 
     parameters = {'reg': [0.02],
                   'isotropy': ["anisotropic", "isotropic", "split"]}

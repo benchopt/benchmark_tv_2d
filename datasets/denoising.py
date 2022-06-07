@@ -22,11 +22,13 @@ class Dataset(BaseDataset):
     # the cross product for each key in the dictionary.
     # A * I + bruit ~ N(mu, sigma)
     parameters = {
-        'std_noise': [0.3]}
+        'std_noise': [0.3],
+        'subsampling': [4]}
 
-    def __init__(self, std_noise=0.3, random_state=27):
+    def __init__(self, std_noise=0.3, subsampling=4, random_state=27):
         # Store the parameters of the dataset
         self.std_noise = std_noise
+        self.subsampling = subsampling
         self.random_state = random_state
 
     def set_lin_op(self):
@@ -34,11 +36,11 @@ class Dataset(BaseDataset):
 
     def get_data(self):
         rng = np.random.RandomState(self.random_state)
-        img = misc.face(gray=True)[::4, ::4]
+        img = misc.face(gray=True)[::self.subsampling, ::self.subsampling]
         height, width = img.shape
         lin_op = self.set_lin_op()
         y_degraded = lin_op(img) + \
             rng.normal(0, self.std_noise, size=(height, width))
         data = dict(lin_op=lin_op, y=y_degraded)
 
-        return y_degraded.shape[0], data
+        return data

@@ -1,0 +1,20 @@
+objective:
+  - TV2D[isotropy=anisotropic,reg=0.02]
+  - TV2D[isotropy=isotropic,reg=0.02]
+  - TV2D[isotropy=split,reg=0.02]
+dataset:
+  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=10,type_lin_op=deblurring]
+  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=10,type_lin_op=denoising]
+  - Deblurring[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4]
+  - Denoising[std_noise=0.3,subsampling=4]
+solver:
+  - Chambolle-Pock PD-split[ratio=10.0,theta=1.0]
+  - PGD[prox_tv_method=dr]
+  - PGD[prox_tv_method=pd]
+  - PGD[prox_tv_method=yang]
+  - PGD[prox_tv_method=condat]
+  - PGD[prox_tv_method=chambolle-pock]
+  - PGD[prox_tv_method=kolmogorov]
+n-repetitions: 1
+timeout: 60
+max-runs: 50
