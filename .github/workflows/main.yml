@@ -27,6 +27,7 @@ jobs:
       VERSION_PYTHON: ${{ matrix.version_python }}
       BENCHOPT_BRANCH: benchopt:main
       BENCHOPT_DEBUG: 1
+      BENCHOPT_CONDA_CMD: mamba
 
     defaults:
       run:
@@ -36,6 +37,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Setup Conda
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -49,19 +51,16 @@ jobs:
     - name: Install benchopt and its dependencies
       run: |
         conda info
-        conda install -yq pip
-
+        conda install -n base -yq mamba
+        mamba install -yq pip
         # Get the correct branch of benchopt
         user=${BENCHOPT_BRANCH%:*}
         branch=${BENCHOPT_BRANCH##*:}
         pip install -U git+https://github.com/$user/benchopt@$branch
-
     - name: Test
       run: |
         benchopt test . --env-name bench_test_env -vl
         benchopt test . --env-name bench_test_env -vl --skip-install
-
-
   linter-flake8:
     runs-on: ubuntu-latest
 
