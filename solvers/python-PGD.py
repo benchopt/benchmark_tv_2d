@@ -11,7 +11,8 @@ class Solver(BaseSolver):
     name = 'PGD'
 
     install_cmd = 'conda'
-    requirements = ['pip:prox-tv']
+    # We need blas devel to get the include file for BLAS/LAPACK operations
+    requirements = ["blas-devel", 'pip:prox-tv']
 
     stopping_strategy = "callback"
 
