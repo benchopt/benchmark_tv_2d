@@ -58,8 +58,8 @@ class Dataset(BaseDataset):
         img = img / 255.0
         height, width = img.shape
         lin_op = self.set_lin_op()
-        y_degraded = lin_op(img) + \
-            rng.normal(0, self.std_noise, size=(height, width))
+        y_degraded = (lin_op(img) +
+                      rng.normal(0, self.std_noise, size=(height, width)))
         data = dict(lin_op=lin_op, y=y_degraded)
 
         return data
