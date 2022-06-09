@@ -30,6 +30,9 @@ class Objective(BaseObjective):
             return lsq + \
                 self.reg * self.anisotropic_tv_value(u)
 
+    def get_one_solution(self):
+        return np.zeros(self.y.shape)
+
     def to_dict(self):
         return dict(lin_op=self.lin_op,
                     reg=self.reg,
