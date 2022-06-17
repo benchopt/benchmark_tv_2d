@@ -18,4 +18,4 @@ solver:
   - PGD[prox_tv_method=kolmogorov]
 n-repetitions: 1
 timeout: 60
-max-runs: 10
+max-runs: 100
