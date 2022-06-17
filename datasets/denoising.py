@@ -4,14 +4,19 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     from scipy import misc
+    from scipy.sparse.linalg import LinearOperator
 
 
-def identity(u):
-    return u
-
-
-identity.T = identity
-identity.norm = 1.
+def identity(height):
+    lin_op = LinearOperator(
+            dtype=np.float64,
+            matvec=lambda x: x,
+            matmat=lambda X: X,
+            rmatvec=lambda x: x,
+            rmatmat=lambda X: X,
+            shape=(height, height),
+    )
+    return lin_op
 
 
 class Dataset(BaseDataset):
@@ -31,15 +36,15 @@ class Dataset(BaseDataset):
         self.subsampling = subsampling
         self.random_state = random_state
 
-    def set_lin_op(self):
-        return identity
+    def set_lin_op(self, height):
+        return identity(height)
 
     def get_data(self):
         rng = np.random.RandomState(self.random_state)
         img = misc.face(gray=True)[::self.subsampling, ::self.subsampling]
         height, width = img.shape
-        lin_op = self.set_lin_op()
-        y_degraded = (lin_op(img) +
+        lin_op = self.set_lin_op(height)
+        y_degraded = (lin_op @ img +
                       rng.normal(0, self.std_noise, size=(height, width)))
         data = dict(lin_op=lin_op, y=y_degraded)
 

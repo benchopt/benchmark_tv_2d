@@ -6,21 +6,23 @@ with safe_import_context() as import_ctx:
     from scipy import misc
     from scipy.signal import fftconvolve
     from scipy.signal.windows import gaussian
+    from scipy.sparse.linalg import LinearOperator
 
 
-def make_blur(size, std):
+def make_blur(size, std, height):
     gaussian_filter = np.outer(
         gaussian(size, std),
         gaussian(size, std))
     gaussian_filter /= gaussian_filter.sum()
-
-    def blur_2d(u):
-        return fftconvolve(u, gaussian_filter, mode="same")
-
-    blur_2d.T = blur_2d
-    blur_2d.norm = 1.
-
-    return blur_2d
+    lin_op = LinearOperator(
+        dtype=np.float64,
+        matvec=lambda x: fftconvolve(x, gaussian_filter, mode='same'),
+        matmat=lambda X: fftconvolve(X, gaussian_filter, mode='same'),
+        rmatvec=lambda x: fftconvolve(x, gaussian_filter, mode='same'),
+        rmatmat=lambda X: fftconvolve(X, gaussian_filter, mode='same'),
+        shape=(height, height),
+    )
+    return lin_op
 
 
 class Dataset(BaseDataset):
@@ -48,8 +50,8 @@ class Dataset(BaseDataset):
         self.subsampling = subsampling
         self.random_state = random_state
 
-    def set_lin_op(self):
-        blur_2d = make_blur(self.size_blur, self.std_blur)
+    def set_lin_op(self, height):
+        blur_2d = make_blur(self.size_blur, self.std_blur, height)
         return blur_2d
 
     def get_data(self):
@@ -57,8 +59,8 @@ class Dataset(BaseDataset):
         img = misc.face(gray=True)[::self.subsampling, ::self.subsampling]
         img = img / 255.0
         height, width = img.shape
-        lin_op = self.set_lin_op()
-        y_degraded = (lin_op(img) +
+        lin_op = self.set_lin_op(height)
+        y_degraded = (lin_op @ img +
                       rng.normal(0, self.std_noise, size=(height, width)))
         data = dict(lin_op=lin_op, y=y_degraded)
 

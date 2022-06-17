@@ -7,29 +7,34 @@ with safe_import_context() as import_ctx:
     import download
     from scipy.signal import fftconvolve
     from scipy.signal.windows import gaussian
+    from scipy.sparse.linalg import LinearOperator
 
 
-def make_blur(size, std):
-    gaussian_filter = np.outer(
-        gaussian(size, std),
-        gaussian(size, std))
-    gaussian_filter /= gaussian_filter.sum()
-
-    def blur_2d(u):
-        return fftconvolve(u, gaussian_filter, mode="same")
-
-    blur_2d.T = blur_2d
-    blur_2d.norm = 1.
-
-    return blur_2d
-
-
-def identity(u):
-    return u
-
-
-identity.T = identity
-identity.norm = 1.
+def make_blur(type_lin_op, size, std,
+              height):
+    if type_lin_op == 'denoising':
+        lin_op = LinearOperator(
+                dtype=np.float64,
+                matvec=lambda x: x,
+                matmat=lambda X: X,
+                rmatvec=lambda x: x,
+                rmatmat=lambda X: X,
+                shape=(height, height),
+            )
+    elif type_lin_op == 'deblurring':
+        filt = np.outer(
+            gaussian(size, std),
+            gaussian(size, std))
+        filt /= filt.sum()
+        lin_op = LinearOperator(
+                dtype=np.float64,
+                matvec=lambda x: fftconvolve(x, filt, mode='same'),
+                matmat=lambda X: fftconvolve(X, filt, mode='same'),
+                rmatvec=lambda x: fftconvolve(x, filt, mode='same'),
+                rmatmat=lambda X: fftconvolve(X, filt, mode='same'),
+                shape=(height, height),
+            )
+    return lin_op
 
 
 class Dataset(BaseDataset):
@@ -63,12 +68,10 @@ class Dataset(BaseDataset):
         self.random_state = random_state
         self.type_lin_op = type_lin_op
 
-    def set_lin_op(self):
-        if self.type_lin_op == 'deblurring':
-            blur_2d = make_blur(self.size_blur, self.std_blur)
-            return blur_2d
-        else:
-            return identity
+    def set_lin_op(self, height):
+        return make_blur(self.type_lin_op,
+                         self.size_blur, self.std_blur,
+                         height)
 
     def get_data(self):
         rng = np.random.RandomState(self.random_state)
@@ -79,8 +82,8 @@ class Dataset(BaseDataset):
         img = (np.array(ImageOps.grayscale(img))
                [::self.subsampling, ::self.subsampling]) / 255.0
         height, width = img.shape
-        lin_op = self.set_lin_op()
-        y_degraded = (lin_op(img) +
+        lin_op = self.set_lin_op(height)
+        y_degraded = (lin_op @ img +
                       rng.normal(0, self.std_noise, size=(height, width)))
         data = dict(lin_op=lin_op, y=y_degraded)
 
