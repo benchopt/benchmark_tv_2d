@@ -4,6 +4,7 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
+    get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
 
 
 class Solver(BaseSolver):
@@ -12,27 +13,28 @@ class Solver(BaseSolver):
     name = "Chambolle-Pock PD-split"
 
     stopping_criterion = SufficientProgressCriterion(
-        patience=20,
+        patience=3,
         strategy="callback")
 
     # any parameter defined here is accessible as a class attribute
     parameters = {"ratio": [10.0],
                   "theta": [1.0]}
 
-    def skip(self, lin_op, reg, y, isotropy):
+    def skip(self, lin_op, reg, delta, data_fit, y, isotropy):
         if isotropy not in ["anisotropic", "isotropic"]:
             return True, "Only aniso and isoTV are implemented yet"
         return False, None
 
-    def set_objective(self, lin_op, reg, y, isotropy):
-        self.reg = reg
+    def set_objective(self, lin_op, reg, delta, data_fit, y, isotropy):
+        self.reg, self.delta = reg, delta
         self.isotropy = isotropy
+        self.data_fit = data_fit
         self.lin_op, self.y = lin_op, y
 
     def run(self, callback):
         # Block preconditioning (2x2)
         LD = np.sqrt(8.)  # Lipschitz constant associated to D
-        LA = self.lin_op.norm
+        LA = get_l2norm(self.lin_op)
         tau = self.ratio / (LA + LD)
         sigma_v = 1.0 / (self.ratio * LD)
         sigma_w = 1.0 / (self.ratio * LA)
@@ -53,10 +55,17 @@ class Solver(BaseSolver):
             gh, gv = self._grad(u_bar)
             vh, vv = proj(vh + sigma_v * gh,
                           vv + sigma_v * gv)
-            w_tmp = w + sigma_w * self.lin_op(u_bar)
-            w = (w_tmp - sigma_w * self.y) / (1.0 + sigma_w)
+            w_tmp = w + sigma_w * self.lin_op @ u_bar
+            if self.data_fit == "huber":
+                # Use Moreau identity + translation rule
+                prox_out = self._prox_huber(
+                    w_tmp / sigma_w - self.y, 1.0 / sigma_w
+                )
+                w = w_tmp - sigma_w * (prox_out + self.y)
+            else:
+                w = (w_tmp - sigma_w * self.y) / (1.0 + sigma_w)
             # grad.T = -div, hence + sign
-            u = u + tau * self._div(vh, vv) - tau * self.lin_op.T(w)
+            u = u + tau * self._div(vh, vv) - tau * self.lin_op.T @ w
             u_bar = u + self.theta * (u - u_old)
         self.u = u
 
@@ -86,3 +95,10 @@ class Solver(BaseSolver):
         norms = np.sqrt(vh ** 2 + vv ** 2)
         factors = 1. / np.maximum(1, 1./self.reg * norms)
         return vh * factors, vv * factors
+
+    def _prox_huber(self, u, mu):
+        return np.where(
+            np.abs(u) <= self.delta * (mu + 1.0),
+            u / (mu + 1.0),
+            u - self.delta * mu * np.sign(u),
+        )
