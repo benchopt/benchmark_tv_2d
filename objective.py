@@ -20,17 +20,18 @@ class Objective(BaseObjective):
         self.isotropy = isotropy
         self.data_fit = data_fit
 
-    def set_data(self, lin_op, y):
-        self.lin_op = lin_op
+    def set_data(self, A, y):
+        self.A = A
         self.y = y
         self.reg = self.reg
 
     def compute(self, u):
-        residual = self.y - self.lin_op(u)
+        # R means "residual"
+        R = self.y - self.A @ u
         if self.data_fit == "lsq":
-            loss = .5 * np.linalg.norm(residual) ** 2
+            loss = .5 * np.linalg.norm(R) ** 2
         else:
-            loss = self.huber(residual, self.delta)
+            loss = self.huber(R, self.delta)
         if self.isotropy == "isotropic":
             penality = self.isotropic_tv_value(u)
         else:
@@ -41,7 +42,7 @@ class Objective(BaseObjective):
         return np.zeros(self.y.shape)
 
     def to_dict(self):
-        return dict(lin_op=self.lin_op,
+        return dict(A=self.A,
                     reg=self.reg,
                     delta=self.delta,
                     data_fit=self.data_fit,

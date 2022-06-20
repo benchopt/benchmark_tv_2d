@@ -20,21 +20,21 @@ class Solver(BaseSolver):
     parameters = {"ratio": [10.0],
                   "theta": [1.0]}
 
-    def skip(self, lin_op, reg, delta, data_fit, y, isotropy):
+    def skip(self, A, reg, delta, data_fit, y, isotropy):
         if isotropy not in ["anisotropic", "isotropic"]:
             return True, "Only aniso and isoTV are implemented yet"
         return False, None
 
-    def set_objective(self, lin_op, reg, delta, data_fit, y, isotropy):
+    def set_objective(self, A, reg, delta, data_fit, y, isotropy):
         self.reg, self.delta = reg, delta
         self.isotropy = isotropy
         self.data_fit = data_fit
-        self.lin_op, self.y = lin_op, y
+        self.A, self.y = A, y
 
     def run(self, callback):
         # Block preconditioning (2x2)
         LD = np.sqrt(8.)  # Lipschitz constant associated to D
-        LA = get_l2norm(self.lin_op)
+        LA = get_l2norm(self.A)
         tau = self.ratio / (LA + LD)
         sigma_v = 1.0 / (self.ratio * LD)
         sigma_w = 1.0 / (self.ratio * LA)
@@ -55,7 +55,7 @@ class Solver(BaseSolver):
             gh, gv = self._grad(u_bar)
             vh, vv = proj(vh + sigma_v * gh,
                           vv + sigma_v * gv)
-            w_tmp = w + sigma_w * self.lin_op @ u_bar
+            w_tmp = w + sigma_w * self.A @ u_bar
             if self.data_fit == "huber":
                 # Use Moreau identity + translation rule
                 prox_out = self._prox_huber(
@@ -65,7 +65,7 @@ class Solver(BaseSolver):
             else:
                 w = (w_tmp - sigma_w * self.y) / (1.0 + sigma_w)
             # grad.T = -div, hence + sign
-            u = u + tau * self._div(vh, vv) - tau * self.lin_op.T @ w
+            u = u + tau * self._div(vh, vv) - tau * self.A.T @ w
             u_bar = u + self.theta * (u - u_old)
         self.u = u
 
