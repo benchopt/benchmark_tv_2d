@@ -4,23 +4,7 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     from scipy import misc
-    from scipy.signal import fftconvolve
-    from scipy.signal.windows import gaussian
-
-
-def make_blur(size, std):
-    gaussian_filter = np.outer(
-        gaussian(size, std),
-        gaussian(size, std))
-    gaussian_filter /= gaussian_filter.sum()
-
-    def blur_2d(u):
-        return fftconvolve(u, gaussian_filter, mode="same")
-
-    blur_2d.T = blur_2d
-    blur_2d.norm = 1.
-
-    return blur_2d
+    make_blur = import_ctx.import_from('shared', 'make_blur')
 
 
 class Dataset(BaseDataset):
@@ -29,37 +13,41 @@ class Dataset(BaseDataset):
 
     # List of parameters to generate the datasets. The benchmark will consider
     # the cross product for each key in the dictionary.
-    # A * I + bruit ~ N(mu, sigma)
+    # A * I + noise ~ N(mu, sigma)
     parameters = {
         'std_noise': [0.02],
         'size_blur': [27],
         'std_blur': [2.],
         'subsampling': [4],
+        'type_A': ['deblurring'],
     }
 
     def __init__(self, std_noise=0.3,
                  size_blur=27, std_blur=8.,
                  subsampling=4,
-                 random_state=27):
+                 random_state=27,
+                 type_A='deblurring'):
         # Store the parameters of the dataset
         self.std_noise = std_noise
         self.size_blur = size_blur
         self.std_blur = std_blur
         self.subsampling = subsampling
         self.random_state = random_state
+        self.type_A = type_A
 
-    def set_lin_op(self):
-        blur_2d = make_blur(self.size_blur, self.std_blur)
-        return blur_2d
+    def set_A(self, height):
+        return make_blur(self.type_A,
+                         self.size_blur, self.std_blur,
+                         height)
 
     def get_data(self):
         rng = np.random.RandomState(self.random_state)
         img = misc.face(gray=True)[::self.subsampling, ::self.subsampling]
         img = img / 255.0
         height, width = img.shape
-        lin_op = self.set_lin_op()
-        y_degraded = lin_op(img) + \
-            rng.normal(0, self.std_noise, size=(height, width))
-        data = dict(lin_op=lin_op, y=y_degraded)
+        A = self.set_A(height)
+        y_degraded = (A @ img +
+                      rng.normal(0, self.std_noise, size=(height, width)))
+        data = dict(A=A, y=y_degraded)
 
-        return y_degraded.shape[0], data
+        return data

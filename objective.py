@@ -6,33 +6,46 @@ with safe_import_context() as import_ctx:
 
 
 class Objective(BaseObjective):
-    name = "Total Variation 2D"
+    name = "TV2D"
 
     parameters = {'reg': [0.02],
-                  'isotropy': ["anisotropic", "isotropic", "split"]}
+                  'delta': [0.9],
+                  'isotropy': ["anisotropic", "isotropic", "split"],
+                  'data_fit': ["lsq", "huber"]}
 
-    def __init__(self, reg=0.02, isotropy="anisotropic"):
+    def __init__(self, reg=0.02, delta=0.1,
+                 isotropy="anisotropic", data_fit="lsq"):
         self.reg = reg
+        self.delta = delta
         self.isotropy = isotropy
+        self.data_fit = data_fit
 
-    def set_data(self, lin_op, y):
-        self.lin_op = lin_op
+    def set_data(self, A, y):
+        self.A = A
         self.y = y
         self.reg = self.reg
 
     def compute(self, u):
-        residual = self.y - self.lin_op(u)
-        lsq = .5 * np.linalg.norm(residual) ** 2
-        if self.isotropy == "isotropic":
-            return lsq + \
-                self.reg * self.isotropic_tv_value(u)
+        # R means "residual"
+        R = self.y - self.A @ u
+        if self.data_fit == "lsq":
+            loss = .5 * np.linalg.norm(R) ** 2
         else:
-            return lsq + \
-                self.reg * self.anisotropic_tv_value(u)
+            loss = self.huber(R, self.delta)
+        if self.isotropy == "isotropic":
+            penality = self.isotropic_tv_value(u)
+        else:
+            penality = self.anisotropic_tv_value(u)
+        return loss + self.reg * penality
+
+    def get_one_solution(self):
+        return np.zeros(self.y.shape)
 
     def to_dict(self):
-        return dict(lin_op=self.lin_op,
+        return dict(A=self.A,
                     reg=self.reg,
+                    delta=self.delta,
+                    data_fit=self.data_fit,
                     y=self.y,
                     isotropy=self.isotropy)
 
@@ -49,3 +62,10 @@ class Objective(BaseObjective):
         gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
         gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
         return gh, gv
+
+    def huber(self, R, delta):
+        norm_1 = np.abs(R)
+        loss = np.where(norm_1 < delta,
+                        0.5 * norm_1**2,
+                        delta * norm_1 - 0.5 * delta**2)
+        return np.sum(loss)
