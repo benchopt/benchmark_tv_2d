@@ -19,14 +19,14 @@ class Dataset(BaseDataset):
         'size_blur': [27],
         'std_blur': [2.],
         'subsampling': [4],
-        'type_A': ['deblurring', 'denoising'],
+        'type_A': ['deblurring'],
     }
 
     def __init__(self, std_noise=0.3,
                  size_blur=27, std_blur=8.,
                  subsampling=4,
                  random_state=27,
-                 type_A='denoising'):
+                 type_A='deblurring'):
         # Store the parameters of the dataset
         self.std_noise = std_noise
         self.size_blur = size_blur
