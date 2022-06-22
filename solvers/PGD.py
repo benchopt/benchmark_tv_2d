@@ -9,7 +9,8 @@ with safe_import_context() as import_ctx:
 
 class Solver(BaseSolver):
     """Primal forward-backward for anisoTV using prox-tv."""
-    name = 'PGD'
+
+    name = 'Primal PGD'
 
     install_cmd = 'conda'
     # We need blas devel to get the include file for BLAS/LAPACK operations
@@ -38,7 +39,7 @@ class Solver(BaseSolver):
         self.A, self.y = A, y
 
     def run(self, callback):
-        n, m = self.y.shape[0], self.y.shape[1]
+        n, m = self.y.shape
         u = np.zeros((n, m))
         stepsize = 1. / (get_l2norm(self.A) ** 2)
         while callback(u):
@@ -51,7 +52,7 @@ class Solver(BaseSolver):
         return self.u
 
     def grad(self, u):
-        R = self.A(u) - self.y
+        R = self.A @ u - self.y
         if self.data_fit == 'lsq':
             return self.A.T @ R
         else:
