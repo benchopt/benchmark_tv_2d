@@ -36,9 +36,8 @@ class Dataset(BaseDataset):
         self.type_A = type_A
 
     def set_A(self, height):
-        return make_blur(self.type_A,
-                         self.size_blur, self.std_blur,
-                         height)
+        return make_blur(self.type_A, height,
+                         self.size_blur, self.std_blur)
 
     def get_data(self):
         rng = np.random.RandomState(self.random_state)
