@@ -13,7 +13,6 @@ with safe_import_context() as import_ctx:
     dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
 
 
-
 class Solver(BaseSolver):
     """Primal-Dual Splitting Method."""
 
