@@ -15,12 +15,12 @@ solver:
   - Chambolle-Pock PD-split[ratio=10.0,theta=1.0]
   - CondatVu[eta=1.0,ratio=1.0]
   - Dual PGD analysis[alpha=1.0,use_acceleration=True]
-  - Primal PGD[prox_tv_method=dr, use_acceleration=True]
-  - Primal PGD[prox_tv_method=pd, use_acceleration=True]
-  - Primal PGD[prox_tv_method=yang, use_acceleration=True]
+#  - Primal PGD[prox_tv_method=dr, use_acceleration=True]
+#  - Primal PGD[prox_tv_method=pd, use_acceleration=True]
+#  - Primal PGD[prox_tv_method=yang, use_acceleration=True]
   - Primal PGD[prox_tv_method=condat, use_acceleration=True]
   - Primal PGD[prox_tv_method=chambolle-pock, use_acceleration=True]
-  - Primal PGD[prox_tv_method=kolmogorov, use_acceleration=True]
+#  - Primal PGD[prox_tv_method=kolmogorov, use_acceleration=True]
 
 n-repetitions: 1
 timeout: 60
