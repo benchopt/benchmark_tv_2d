@@ -5,6 +5,12 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
+    prox_huber = import_ctx.import_from('matrice_op', 'prox_huber')
+    div = import_ctx.import_from('matrice_op', 'div')
+    grad = import_ctx.import_from('matrice_op', 'grad')
+    dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
+                                                'dual_prox_tv_aniso')
+    dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
 
 
 class Solver(BaseSolver):
@@ -46,59 +52,30 @@ class Solver(BaseSolver):
         w = np.zeros((n, m))
         u_bar = u
         proj = {
-            'anisotropic': self._dual_prox_tv_aniso,
-            'isotropic': self._dual_prox_tv_iso,
-        }.get(self.isotropy, self._dual_prox_tv_aniso)
+            'anisotropic': dual_prox_tv_aniso,
+            'isotropic': dual_prox_tv_iso,
+        }.get(self.isotropy, dual_prox_tv_aniso)
 
         while callback(u):
             u_old = u
-            gh, gv = self._grad(u_bar)
+            gh, gv = grad(u_bar)
             vh, vv = proj(vh + sigma_v * gh,
-                          vv + sigma_v * gv)
+                          vv + sigma_v * gv,
+                          self.reg)
             w_tmp = w + sigma_w * self.A @ u_bar
             if self.data_fit == "huber":
                 # Use Moreau identity + translation rule
-                prox_out = self._prox_huber(
-                    w_tmp / sigma_w - self.y, 1.0 / sigma_w
+                prox_out = prox_huber(
+                    w_tmp / sigma_w - self.y, 1.0 / sigma_w,
+                    self.delta
                 )
                 w = w_tmp - sigma_w * (prox_out + self.y)
             else:
                 w = (w_tmp - sigma_w * self.y) / (1.0 + sigma_w)
             # grad.T = -div, hence + sign
-            u = u + tau * self._div(vh, vv) - tau * self.A.T @ w
+            u = u + tau * div(vh, vv) - tau * self.A.T @ w
             u_bar = u + self.theta * (u - u_old)
         self.u = u
 
     def get_result(self):
         return self.u
-
-    def _div(self, vh, vv):
-        dh = np.vstack(
-            (np.diff(vh, prepend=0, axis=0)[:-1, :], -vh[-2, :])
-        )
-        dv = np.column_stack(
-            (np.diff(vv, prepend=0, axis=1)[:, :-1], -vv[:, -2])
-        )
-        return dh + dv
-
-    def _grad(self, u):
-        # Neumann condition
-        gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
-        gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
-        return gh, gv
-
-    def _dual_prox_tv_aniso(self, vh, vv):
-        return np.clip(vh, -self.reg, self.reg), \
-            np.clip(vv, -self.reg, self.reg)
-
-    def _dual_prox_tv_iso(self, vh, vv):
-        norms = np.sqrt(vh ** 2 + vv ** 2)
-        factors = 1. / np.maximum(1, 1./self.reg * norms)
-        return vh * factors, vv * factors
-
-    def _prox_huber(self, u, mu):
-        return np.where(
-            np.abs(u) <= self.delta * (mu + 1.0),
-            u / (mu + 1.0),
-            u - self.delta * mu * np.sign(u),
-        )

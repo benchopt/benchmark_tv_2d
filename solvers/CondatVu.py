@@ -5,6 +5,13 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
+    grad_F = import_ctx.import_from('matrice_op', 'grad_F')
+    div = import_ctx.import_from('matrice_op', 'div')
+    grad = import_ctx.import_from('matrice_op', 'grad')
+    dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
+                                                'dual_prox_tv_aniso')
+    dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
+
 
 
 class Solver(BaseSolver):
@@ -19,6 +26,11 @@ class Solver(BaseSolver):
     # any parameter defined here is accessible as a class attribute
     parameters = {'ratio': [1.],
                   'eta': [1.]}
+
+    def skip(self, A, reg, delta, data_fit, y, isotropy):
+        if isotropy not in ["anisotropic", "isotropic"]:
+            return True, "Only aniso and isoTV are implemented yet"
+        return False, None
 
     def set_objective(self, A, reg, delta, data_fit, y, isotropy):
         self.reg, self.delta = reg, delta
@@ -39,16 +51,18 @@ class Solver(BaseSolver):
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
         proj = {
-            'anisotropic': self._dual_prox_tv_aniso,
-            'isotropic': self._dual_prox_tv_iso,
-        }.get(self.isotropy, self._dual_prox_tv_aniso)
+            'anisotropic': dual_prox_tv_aniso,
+            'isotropic': dual_prox_tv_iso,
+        }.get(self.isotropy, dual_prox_tv_aniso)
 
         while callback(u):
-            u_tmp = (u - tau * self.grad(u)
-                     + tau * self._div(vh, vv))
-            gh, gv = self._grad(2 * u_tmp - u)
+            u_tmp = (u - tau * grad_F(self.y, self.A, u,
+                                      self.data_fit, self.delta)
+                     + tau * div(vh, vv))
+            gh, gv = grad(2 * u_tmp - u)
             vh_tmp, vv_tmp = proj(vh + sigma_v * gh,
-                                  vv + sigma_v * gv)
+                                  vv + sigma_v * gv,
+                                  self.reg)
             u = eta * u_tmp + (1 - eta) * u
             vh = eta * vh_tmp + (1 - eta) * vh
             vv = eta * vv_tmp + (1 - eta) * vv
@@ -56,41 +70,3 @@ class Solver(BaseSolver):
 
     def get_result(self):
         return self.u
-
-    def st(self, w, mu):
-        w -= np.clip(w, -mu, mu)
-        return w
-
-    def grad(self, u):
-        R = self.A @ u - self.y
-        if self.data_fit == 'lsq':
-            return self.A.T @ R
-        else:
-            return self.A.T @ self.grad_huber(R, self.delta)
-
-    def grad_huber(self, R, delta):
-        return np.where(np.abs(R) < delta, R, np.sign(R) * delta)
-
-    def _div(self, vh, vv):
-        dh = np.vstack(
-            (np.diff(vh, prepend=0, axis=0)[:-1, :], -vh[-2, :])
-        )
-        dv = np.column_stack(
-            (np.diff(vv, prepend=0, axis=1)[:, :-1], -vv[:, -2])
-        )
-        return dh + dv
-
-    def _grad(self, u):
-        # Neumann condition
-        gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
-        gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
-        return gh, gv
-
-    def _dual_prox_tv_aniso(self, vh, vv):
-        return np.clip(vh, -self.reg, self.reg), \
-            np.clip(vv, -self.reg, self.reg)
-
-    def _dual_prox_tv_iso(self, vh, vv):
-        norms = np.sqrt(vh ** 2 + vv ** 2)
-        factors = 1. / np.maximum(1, 1./self.reg * norms)
-        return vh * factors, vv * factors
