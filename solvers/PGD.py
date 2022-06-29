@@ -5,7 +5,6 @@ with safe_import_context() as import_ctx:
     import numpy as np
     import prox_tv as ptv
     get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
-    grad_F = import_ctx.import_from('matrice_op', 'grad_F')
 
 
 class Solver(BaseSolver):
@@ -26,8 +25,7 @@ class Solver(BaseSolver):
         "condat",
         "chambolle-pock",
         "kolmogorov"
-    ],
-        'use_acceleration': [False, True]}
+    ]}
 
     def skip(self, A, reg, delta, data_fit, y, isotropy):
         if isotropy != "anisotropic":
@@ -42,25 +40,23 @@ class Solver(BaseSolver):
 
     def run(self, callback):
         n, m = self.y.shape
-        stepsize = 1. / (get_l2norm(self.A) ** 2)
         u = np.zeros((n, m))
-        u_acc = u.copy()
-        u_old = u.copy()
-
-        t_new = 1
+        stepsize = 1. / (get_l2norm(self.A) ** 2)
         while callback(u):
-            if self.use_acceleration:
-                t_old = t_new
-                t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
-                u_old[:] = u
-                u[:] = u_acc
             u = ptv.tv1_2d(
-                u - stepsize * grad_F(self.y, self.A, u,
-                                      self.data_fit, self.delta),
+                u - stepsize * self.grad(u),
                 self.reg * stepsize, method=self.prox_tv_method)
-            if self.use_acceleration:
-                u_acc[:] = u + (t_old - 1.) / t_new * (u - u_old)
         self.u = u
 
     def get_result(self):
         return self.u
+
+    def grad(self, u):
+        R = self.A @ u - self.y
+        if self.data_fit == 'lsq':
+            return self.A.T @ R
+        else:
+            return self.A.T @ self.grad_huber(R, self.delta)
+
+    def grad_huber(self, R, delta):
+        return np.where(np.abs(R) < delta, R, np.sign(R) * delta)
