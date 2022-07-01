@@ -3,6 +3,7 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
+    grad = import_ctx.import_from('matrice_op', 'grad')
 
 
 class Objective(BaseObjective):
@@ -50,18 +51,12 @@ class Objective(BaseObjective):
                     isotropy=self.isotropy)
 
     def isotropic_tv_value(self, u):
-        gh, gv = self.grad(u)
+        gh, gv = grad(u)
         return (np.sqrt(gh ** 2 + gv ** 2)).sum()
 
     def anisotropic_tv_value(self, u):
-        gh, gv = self.grad(u)
+        gh, gv = grad(u)
         return (np.abs(gh) + np.abs(gv)).sum()
-
-    def grad(self, u):
-        # Neumann condition
-        gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
-        gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
-        return gh, gv
 
     def huber(self, R, delta):
         norm_1 = np.abs(R)
