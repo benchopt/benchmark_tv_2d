@@ -20,20 +20,22 @@ class Dataset(BaseDataset):
         'std_blur': [2.],
         'subsampling': [4],
         'type_A': ['deblurring', 'denoising'],
+        'type_n': ['gaussian', 'laplace']
     }
 
     def __init__(self, std_noise=0.24,
                  size_blur=27, std_blur=8.,
                  subsampling=4,
                  random_state=27,
-                 type_A='denoising'):
+                 type_A='denoising',
+                 type_n='gaussian'):
         # Store the parameters of the dataset
         self.std_noise = std_noise
         self.size_blur = size_blur
         self.std_blur = std_blur
         self.subsampling = subsampling
         self.random_state = random_state
-        self.type_A = type_A
+        self.type_A, self.type_n = type_A, type_n
 
     def set_A(self, height):
         return make_blur(self.type_A, height,
@@ -49,9 +51,14 @@ class Dataset(BaseDataset):
         ).toarray()[0]
         img = (np.cumsum(rng.randn(height, width) * z, axis=1)
                [::self.subsampling, ::self.subsampling])
+        if self.type_n == 'gaussian':
+            # noise ~ N(loc, scale)
+            n = rng.normal(0, self.std_noise, size=img.shape)
+        elif self.type_n == 'laplace':
+            # noise ~ L(loc, scale)
+            n = rng.laplace(0, self.std_noise, size=img.shape)
         A = self.set_A(img.shape[0])
-        y_degraded = (A @ img +
-                      rng.normal(0, self.std_noise, size=img.shape))
+        y_degraded = A @ img + n
         data = dict(A=A, y=y_degraded)
 
         return data
