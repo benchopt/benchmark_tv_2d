@@ -98,10 +98,9 @@ class Solver(BaseSolver):
             def jac(u):
                 return jac_loss(AtA, Aty, vh, vv, n, m, u)
 
-            res = minimize(func, x0=u.flatten(), jac=jac,
-                           method='BFGS', tol=tol_cg)
-            print(res.success)
-            u = (res.x).reshape((n, m))
+            u = minimize(func, x0=u.flatten(), jac=jac,
+                           method='BFGS', tol=tol_cg).x
+            u = u.reshape((n, m))
         self.u = u
 
     def get_result(self):
