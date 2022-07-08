@@ -5,12 +5,22 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     from scipy.sparse.linalg import LinearOperator
-    from scipy.sparse.linalg import cg
+    from scipy.optimize import minimize
     div = import_ctx.import_from('matrice_op', 'div')
     grad = import_ctx.import_from('matrice_op', 'grad')
     dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
                                                 'dual_prox_tv_aniso')
     dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
+
+
+def loss(AtA, Aty, vh, vv, n, m, u):
+    R = (AtA @ u).reshape((n, m)) - (Aty + div(vh, vv))
+    return .5 * np.linalg.norm(R, ord=2) ** 2
+
+
+def jac_loss(AtA, Aty, vh, vv, n, m, u):
+    R = (AtA @ u).reshape((n, m)) - (Aty + div(vh, vv))
+    return AtA @ (R.flatten())
 
 
 class Solver(BaseSolver):
@@ -46,30 +56,52 @@ class Solver(BaseSolver):
         u = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
-        v_tmp = np.zeros((n, m))
-        # alpha / rho
-        DA_inv = grad(np.linalg.pinv(self.A @ np.identity(n)))[0]
-        stepsize = self.alpha / (np.linalg.norm(DA_inv, ord=2)**2)
+        LD = np.sqrt(8.)  # Lipschitz constant associated to D
+        sigma_v = 1.0 / (10 * LD)
         tol_cg = 1e-12
         Aty = self.A.T @ self.y
         AtA = LinearOperator(shape=(n * m, n * m),
                              matvec=lambda x: self.A.T @ (
-                                self.A @ (x.reshape((n, m)))))
+                                self.A @ x.reshape((n, m))))
         proj = {
             'anisotropic': dual_prox_tv_aniso,
             'isotropic': dual_prox_tv_iso,
         }.get(self.isotropy, dual_prox_tv_aniso)
 
+        vh_old = vh.copy()
+        vv_old = vv.copy()
+        vh_acc = vh.copy()
+        vv_acc = vv.copy()
+
+        t_new = 1
         while callback(u):
-            v_tmp, _ = cg(AtA, (Aty + div(vh, vv)).flatten(),
-                          x0=v_tmp.flatten(), tol=tol_cg)
-            v_tmp = v_tmp.reshape((n, m))
-            vh, vv = proj(vh + stepsize * grad(v_tmp)[0],
-                          vv + stepsize * grad(v_tmp)[1],
+            if self.use_acceleration:
+                t_old = t_new
+                t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
+                vh_old[:] = vh
+                vv_old[:] = vv
+                vh[:] = vh_acc
+                vv[:] = vv_acc
+
+            gh, gv = grad(u)
+            vh, vv = proj(vh + sigma_v * gh,
+                          vv + sigma_v * gv,
                           self.reg)
-            u, _ = cg(AtA, (Aty + div(vh, vv)).flatten(),
-                      x0=u.flatten(), tol=tol_cg)
-            u = u.reshape((n, m))
+
+            if self.use_acceleration:
+                vh_acc[:] = vh + (t_old - 1.) / t_new * (vh - vh_old)
+                vv_acc[:] = vv + (t_old - 1.) / t_new * (vv - vv_old)
+
+            def func(u):
+                return loss(AtA, Aty, vh, vv, n, m, u)
+
+            def jac(u):
+                return jac_loss(AtA, Aty, vh, vv, n, m, u)
+
+            res = minimize(func, x0=u.flatten(), jac=jac,
+                           method='BFGS', tol=tol_cg)
+            print(res.success)
+            u = (res.x).reshape((n, m))
         self.u = u
 
     def get_result(self):
