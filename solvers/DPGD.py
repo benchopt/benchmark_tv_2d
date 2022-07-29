@@ -6,11 +6,11 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from scipy.sparse.linalg import LinearOperator
     from scipy.sparse.linalg import cg
-    div = import_ctx.import_from('matrice_op', 'div')
-    grad = import_ctx.import_from('matrice_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
+    div = import_ctx.import_from('matrix_op', 'div')
+    grad = import_ctx.import_from('matrix_op', 'grad')
+    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
                                                 'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
+    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
 
 
 class Solver(BaseSolver):
@@ -33,6 +33,8 @@ class Solver(BaseSolver):
             return True, "solver has to do a too large densification"
         elif isotropy not in ["anisotropic", "isotropic"]:
             return True, "Only aniso and isoTV are implemented yet"
+        if (A @ y != y).all():
+            return True, "solver only works for denoising"
         return False, None
 
     def set_objective(self, A, reg, delta, data_fit, y, isotropy):
@@ -95,7 +97,6 @@ class Solver(BaseSolver):
 
             u_tmp = (Aty + div(vh, vv)).flatten()
             u, info = cg(AtA, u_tmp, x0=u.flatten(), tol=tol_cg)
-            print(info)
             u = u.reshape((n, m))
         self.u = u
 
