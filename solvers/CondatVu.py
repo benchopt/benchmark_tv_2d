@@ -5,12 +5,12 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
-    grad_F = import_ctx.import_from('matrice_op', 'grad_F')
-    div = import_ctx.import_from('matrice_op', 'div')
-    grad = import_ctx.import_from('matrice_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
+    grad_F = import_ctx.import_from('shared', 'grad_F')
+    div = import_ctx.import_from('matrix_op', 'div')
+    grad = import_ctx.import_from('matrix_op', 'grad')
+    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
                                                 'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
+    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
 
 
 class Solver(BaseSolver):

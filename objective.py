@@ -3,7 +3,8 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
-    grad = import_ctx.import_from('matrice_op', 'grad')
+    grad = import_ctx.import_from('matrix_op', 'grad')
+    huber = import_ctx.import_from('shared', 'huber')
 
 
 class Objective(BaseObjective):
@@ -32,7 +33,7 @@ class Objective(BaseObjective):
         if self.data_fit == "lsq":
             loss = .5 * np.linalg.norm(R) ** 2
         else:
-            loss = self.huber(R, self.delta)
+            loss = huber(R, self.delta)
         if self.isotropy == "isotropic":
             penality = self.isotropic_tv_value(u)
         else:
@@ -57,10 +58,3 @@ class Objective(BaseObjective):
     def anisotropic_tv_value(self, u):
         gh, gv = grad(u)
         return (np.abs(gh) + np.abs(gv)).sum()
-
-    def huber(self, R, delta):
-        norm_1 = np.abs(R)
-        loss = np.where(norm_1 < delta,
-                        0.5 * norm_1**2,
-                        delta * norm_1 - 0.5 * delta**2)
-        return np.sum(loss)

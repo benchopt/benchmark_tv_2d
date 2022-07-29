@@ -1,14 +1,6 @@
 import numpy as np
 
 
-def grad_F(y, A, u, data_fit, delta):
-    R = A @ u - y
-    if data_fit == 'lsq':
-        return A.T @ R
-    elif data_fit == 'huber':
-        return A.T @ np.where(np.abs(R) < delta, R, np.sign(R) * delta)
-
-
 def prox_huber(u, mu, delta):
     return np.where(
         np.abs(u) <= delta * (mu + 1.0),

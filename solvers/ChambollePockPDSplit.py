@@ -5,12 +5,12 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
-    prox_huber = import_ctx.import_from('matrice_op', 'prox_huber')
-    div = import_ctx.import_from('matrice_op', 'div')
-    grad = import_ctx.import_from('matrice_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
+    prox_huber = import_ctx.import_from('matrix_op', 'prox_huber')
+    div = import_ctx.import_from('matrix_op', 'div')
+    grad = import_ctx.import_from('matrix_op', 'grad')
+    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
                                                 'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
+    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
 
 
 class Solver(BaseSolver):
@@ -24,7 +24,7 @@ class Solver(BaseSolver):
 
     # any parameter defined here is accessible as a class attribute
     parameters = {"ratio": [10.0],
-                  "theta": [1.0]}
+                  "eta": [1.0]}
 
     def skip(self, A, reg, delta, data_fit, y, isotropy):
         if isotropy not in ["anisotropic", "isotropic"]:
@@ -74,7 +74,7 @@ class Solver(BaseSolver):
                 w = (w_tmp - sigma_w * self.y) / (1.0 + sigma_w)
             # grad.T = -div, hence + sign
             u = u + tau * div(vh, vv) - tau * self.A.T @ w
-            u_bar = u + self.theta * (u - u_old)
+            u_bar = u + self.eta * (u - u_old)
         self.u = u
 
     def get_result(self):
