@@ -6,11 +6,13 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from scipy.sparse.linalg import LinearOperator
     from scipy.sparse.linalg import cg
-    div = import_ctx.import_from('matrice_op', 'div')
-    grad = import_ctx.import_from('matrice_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
+    huber = import_ctx.import_from('shared', 'huber')
+    grad_huber = import_ctx.import_from('shared', 'grad_huber')
+    div = import_ctx.import_from('matrix_op', 'div')
+    grad = import_ctx.import_from('matrix_op', 'grad')
+    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
                                                 'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
+    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
 
 
 class Solver(BaseSolver):
@@ -22,7 +24,7 @@ class Solver(BaseSolver):
     )
 
     # any parameter defined here is accessible as a class attribute
-    parameters = {'gamma': [1.9]}
+    parameters = {'gamma': [0.1]}
 
     def skip(self, A, reg, delta, data_fit, y, isotropy):
         if data_fit == 'huber':

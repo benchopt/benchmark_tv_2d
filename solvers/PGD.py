@@ -5,7 +5,7 @@ with safe_import_context() as import_ctx:
     import numpy as np
     import prox_tv as ptv
     get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
-    grad_F = import_ctx.import_from('matrice_op', 'grad_F')
+    grad_F = import_ctx.import_from('shared', 'grad_F')
 
 
 class Solver(BaseSolver):

@@ -6,11 +6,11 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from scipy.sparse.linalg import LinearOperator
     from scipy.sparse.linalg import cg
-    div = import_ctx.import_from('matrice_op', 'div')
-    grad = import_ctx.import_from('matrice_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrice_op',
+    div = import_ctx.import_from('matrix_op', 'div')
+    grad = import_ctx.import_from('matrix_op', 'grad')
+    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
                                                 'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrice_op', 'dual_prox_tv_iso')
+    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
 
 
 class Solver(BaseSolver):
@@ -82,9 +82,8 @@ class Solver(BaseSolver):
                 vv[:] = vv_acc
 
             v_tmp = (Aty + div(vh, vv)).flatten()
-            v, info = cg(AtA, v_tmp, x0=v.flatten(), tol=tol_cg)
+            v, _ = cg(AtA, v_tmp, x0=v.flatten(), tol=tol_cg)
             v = v.reshape((n, m))
-            print(info)
             gh, gv = grad(v)
             vh, vv = proj(vh + sigma_v * gh,
                           vv + sigma_v * gv,
@@ -96,7 +95,7 @@ class Solver(BaseSolver):
                 vv_acc[:] = vv + (t_old - 1.) / t_new * (vv - vv_old)
 
             u_tmp = (Aty + div(vh, vv)).flatten()
-            u, info = cg(AtA, u_tmp, x0=u.flatten(), tol=tol_cg)
+            u, _ = cg(AtA, u_tmp, x0=u.flatten(), tol=tol_cg)
             u = u.reshape((n, m))
         self.u = u
 
