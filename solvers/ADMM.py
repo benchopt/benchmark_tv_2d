@@ -6,6 +6,7 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from scipy.sparse.linalg import LinearOperator
     from scipy.sparse.linalg import cg
+    from scipy.optimize import minimize
     huber = import_ctx.import_from('shared', 'huber')
     grad_huber = import_ctx.import_from('shared', 'grad_huber')
     div = import_ctx.import_from('matrix_op', 'div')
@@ -13,6 +14,24 @@ with safe_import_context() as import_ctx:
     dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
                                                 'dual_prox_tv_aniso')
     dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
+
+
+def loss(y, A, u, delta, n, m, zh, zv, muh, muv, gamma):
+    u_tmp = u.reshape((n, m))
+    R = A @ u_tmp - y
+    gh, gv = grad(u_tmp)
+    return huber(R, delta) + gamma / 2 * (
+        np.linalg.norm(gh - zh + muh / gamma, ord='fro') ** 2
+        + np.linalg.norm(gv - zv + muv / gamma, ord='fro') ** 2)
+
+
+def jac_loss(y, A, u, delta, n, m, zh, zv, muh, muv, gamma):
+    u_tmp = u.reshape((n, m))
+    R = A @ u_tmp - y
+    gh, gv = grad(u_tmp)
+    return (A.T @ grad_huber(R, delta)
+            - gamma * div(gh - zh + muh / gamma,
+                          gv - zv + muv / gamma)).flatten()
 
 
 class Solver(BaseSolver):
@@ -27,9 +46,7 @@ class Solver(BaseSolver):
     parameters = {'gamma': [0.1]}
 
     def skip(self, A, reg, delta, data_fit, y, isotropy):
-        if data_fit == 'huber':
-            return True, "solver does not work with huber loss"
-        elif isotropy not in ["anisotropic", "isotropic"]:
+        if isotropy not in ["anisotropic", "isotropic"]:
             return True, "Only aniso and isoTV are implemented yet"
         return False, None
 
@@ -65,8 +82,22 @@ class Solver(BaseSolver):
                                   - gamma * div(grad(x.reshape((n, m)))[0],
                                                 grad(x.reshape((n, m)))[1]))
         while callback(u):
-            u_tmp = (Aty + div(muh, muv) - gamma * div(zh, zv)).flatten()
-            u, _ = cg(AtA_gDtD, u_tmp, x0=u.flatten(), tol=tol_cg)
+            if self.data_fit == 'lsq':
+                u_tmp = (Aty + div(muh, muv) - gamma * div(zh, zv)).flatten()
+                u, _ = cg(AtA_gDtD, u_tmp, x0=u.flatten(), tol=tol_cg)
+            elif self.data_fit == 'huber':
+
+                def func(u):
+                    return loss(self.y, self.A, u, self.delta,
+                                n, m, zh, zv, muh, muv, gamma)
+
+                def jac(u):
+                    return jac_loss(self.y, self.A, u, self.delta,
+                                    n, m, zh, zv, muh, muv, gamma)
+
+                u = minimize(func, x0=u.flatten(), jac=jac,
+                             method='BFGS', tol=tol_cg).x
+
             u = u.reshape((n, m))
             gh, gv = grad(u)
             zh, zv = proj(gh * gamma + muh,
