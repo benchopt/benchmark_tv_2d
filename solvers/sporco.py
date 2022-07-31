@@ -14,7 +14,7 @@ class Solver(BaseSolver):
 
     install_cmd = 'conda'
     # We need blas devel to get the include file for BLAS/LAPACK operations
-    requirements = ['pip:sporco']
+    requirements = ["blas-devel", 'pip:sporco']
 
     stopping_strategy = 'callback'
 

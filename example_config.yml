@@ -4,8 +4,8 @@ objective:
   - TV2D[data_fit=lsq, delta=0.0, isotropy=isotropic,reg=0.02]
   - TV2D[data_fit=huber, delta=0.9, isotropy=isotropic,reg=0.02]
 dataset:
-  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=10,type_lin_op=deblurring]
-  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.3,subsampling=10,type_lin_op=denoising]
+  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=10,type_A=deblurring]
+  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.3,subsampling=10,type_A=denoising]
   - Deblurring[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4]
   - Denoising[std_noise=0.3,subsampling=4]
   - Simulated[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4,type_A=deblurring,type_n=laplace]
@@ -24,5 +24,5 @@ solver:
   - sporco[use_acceleration=True]
 
 n-repetitions: 1
-timeout: 60
+timeout: 200
 max-runs: 100
