@@ -15,6 +15,12 @@ class Objective(BaseObjective):
                   'isotropy': ["anisotropic", "isotropic", "split"],
                   'data_fit': ["lsq", "huber"]}
 
+    # This makes sure that for each solver, we have one simulated dataset that
+    # will be compatible in the test_solver.
+    test_parameters = {
+        'isotropy': ["anisotropic", "isotropic"]
+    }
+
     def __init__(self, reg=0.02, delta=0.1,
                  isotropy="anisotropic", data_fit="lsq"):
         self.reg = reg
