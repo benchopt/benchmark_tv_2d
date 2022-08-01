@@ -20,8 +20,6 @@ class Solver(BaseSolver):
 
     stopping_strategy = 'callback'
 
-    parameters = {'use_acceleration': [False, True]}
-
     def skip(self, A, reg, delta, data_fit, y, isotropy):
         if isotropy != "isotropic":
             return True, "sporco supports only isoTV"
@@ -38,32 +36,24 @@ class Solver(BaseSolver):
         # initialisation
         stepsize = 1. / (get_l2norm(self.A) ** 2)
         u = np.zeros((n, m))
-        u_acc = u.copy()
-        u_old = u.copy()
-
-        t_new = 1
         opt = tvl2.TVL2Denoise.Options({'FastSolve': True,
                                         'Verbose': False,
                                         'MaxMainIter': 100,
-                                        'GSTol': 1e-12,
-                                        'AbsStopTol': 1e-12,
-                                        'gEvalY': False,
+                                        'AbsStopTol': 0.,
+                                        'RelStopTol': 0.,
+                                        'RelaxParam': 0.5,
                                         'AutoRho': {'AutoScaling': False,
-                                                    'Enabled': False}})
+                                                    'Enabled': False},
+                                        'gEvalY': False,
+                                        'MaxGSIter': 100,
+                                        'GSTol': 0.})
 
         while callback(u):
-            if self.use_acceleration:
-                t_old = t_new
-                t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
-                u_old[:] = u
-                u[:] = u_acc
             u = tvl2.TVL2Denoise(
                 S=u - stepsize * grad_F(self.y, self.A, u,
                                         self.data_fit, self.delta),
                 lmbda=self.reg * stepsize, opt=opt,
                 axes=(0, 1), caxis=None).solve()
-            if self.use_acceleration:
-                u_acc[:] = u + (t_old - 1.) / t_new * (u - u_old)
         self.u = u
 
     def get_result(self):
