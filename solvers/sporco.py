@@ -24,7 +24,7 @@ class Solver(BaseSolver):
 
     def skip(self, A, reg, delta, data_fit, y, isotropy):
         if isotropy != "isotropic":
-            return True, "prox-tv supports only isoTV"
+            return True, "sporco supports only isoTV"
         return False, None
 
     def set_objective(self, A, reg, delta, data_fit, y, isotropy):
