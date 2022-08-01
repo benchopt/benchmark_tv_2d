@@ -8,7 +8,7 @@ dataset:
   - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.3,subsampling=10,type_A=denoising]
   - Deblurring[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4]
   - Denoising[std_noise=0.3,subsampling=4]
-  - Simulated[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4,type_A=deblurring,type_n=laplace]
+  - Simulated[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4,type_A=deblurring,type_n=gaussian]
   - Simulated[size_blur=27,std_blur=2.0,std_noise=0.3,subsampling=4,type_A=denoising,type_n=gaussian]
 solver:
   - ADMM[gamma=0.1]
@@ -21,7 +21,7 @@ solver:
   - Primal PGD[prox_tv_method=condat, use_acceleration=True]
   - Primal PGD[prox_tv_method=chambolle-pock, use_acceleration=True]
   - Primal PGD[prox_tv_method=kolmogorov, use_acceleration=True]
-  - sporco[use_acceleration=True]
+  - sporco
 
 n-repetitions: 1
 timeout: 200
