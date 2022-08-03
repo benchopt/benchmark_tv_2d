@@ -25,7 +25,7 @@ In isotropic cases:
 
 
 $$
-g(\\boldsymbol{u}) = \\lambda \\| \\sqrt{ (D_1 \\boldsymbol{u})^2 + (\\boldsymbol{u}^{\\top} D_2)^2 \\|_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits_{l = 1}^{m-1} \\sqrt{\\vert u_{k+1,l} - u_{k,l} \\vert^2 + \\vert u_{k,l+1} - u_{k,l} \\vert^2}
+g(\\boldsymbol{u}) = \\lambda \\| \\sqrt{ (D_1 \\boldsymbol{u})^2 + (\\boldsymbol{u}^{\\top} D_2)^2 } \\|_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits_{l = 1}^{m-1} \\sqrt{\\vert u_{k+1,l} - u_{k,l} \\vert^2 + \\vert u_{k,l+1} - u_{k,l} \\vert^2}
 $$
 
 
