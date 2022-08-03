@@ -18,16 +18,20 @@ h_{\\delta}(t) = \\begin{cases} \\frac{1}{2} t^2 & \\mathrm{ if } \\vert t \\ver
 $$
 
 
-- $D_1 \\in \\mathbb{R}^{(n-1) \\times n}$ and $D_2 \\in \\mathbb{R}^{(m-1) \\times m}$ are finite difference operators, such that the regularised TV-2D term $g(\\boldsymbol{u}) = \\lambda \\| \\boldsymbol{u} \\|_{TV} $ expressed as follows.
+- $D_1 \\in \\mathbb{R}^{(n-1) \\times n}$ and $D_2 \\in \\mathbb{R}^{(m-1) \\times m}$ are finite difference operators, such that the regularised TV-2D term $g(\\boldsymbol{u}) = \\lambda \\| \\boldsymbol{u} \\|_{TV}$ expressed as follows.
 
 
 In isotropic cases:
+
+
 $$
 g(\\boldsymbol{u}) = \\lambda \\| \\sqrt{ (D_1 \\boldsymbol{u})^2 + (\\boldsymbol{u}^{\\top} D_2)^2 \\|_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits_{l = 1}^{m-1} \\sqrt{\\vert u_{k+1,l} - u_{k,l} \\vert^2 + \\vert u_{k,l+1} - u_{k,l} \\vert^2}
 $$
 
 
 In anisotropic cases:
+
+
 $$
 g(\\boldsymbol{u}) = \\lambda \\| D_1 \\boldsymbol{u} \\|_{1} + \\| \\boldsymbol{u}^{\\top} D_2 \\|_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits_{l = 1}^{m-1} (\\vert u_{k+1,l} - u_{k,l} \\vert + \\vert u_{k,l+1} - u_{k,l} \\vert)
 $$
