@@ -1,17 +1,33 @@
-Benchmark repository for Total Variation 2D
-===========================================
+Unidimensional Total variation (TV) Benchmark
+=============================================
 |Build Status| |Python 3.6+|
 
-Benchopt is a package to simplify and make more transparent and
-reproducible the comparisons of optimization algorithms.
-2D Total Variation regularization consists in solving the following program:
+This benchmark is dedicated to solver of TV-1D regularised regression problem:
 
-.. math::
+$$\\boldsymbol{u} \\in \\underset{\\boldsymbol{u} \\in \\mathbb{R}^{n \\times m}}{\\mathrm{argmin}} f(\\boldsymbol{y}, A \\boldsymbol{u}) + g(\\boldsymbol{u})$$
 
-    \min_{w} \frac{1}{2} \|y - A w\|^2_2 + J(D w)
 
-where D stands for a finite difference operator, J is either a l1-norm or
-l1/l2-norm and A is a linear operator.
+- $\\boldsymbol{y} \\in \\mathbb{R}^{n \\times m}$ is observation as target vector
+- $A \\in \\mathbb{R}^{n \\times n}$ is a designed operator as an amplifier.
+- $\\lambda > 0$ is a regularization hyperparameter.
+- $f(\\boldsymbol{y}, A\\boldsymbol{u}) = \\sum\\limits_{k=1}^{n} \\sum\\limits_{l=1}^{m} l(y_{k,l}, (A\\boldsymbol{u})_{k,l})$ is a loss function, where $l$ can be quadratic loss as $l(y, x) = \\frac{1}{2} \\vert y - x \\vert_2^2$, or Huber loss $l(y, x) = h_{\\delta} (y - x)$ defined by
+
+
+$$   
+h_{\\delta}(t) = \\begin{cases} \\frac{1}{2} t^2 & \\mathrm{ if } \\vert t \\vert \\le \\delta \\\\ \\delta \\vert t \\vert - \\frac{1}{2} \\delta^2 & \\mathrm{ otherwise} \\end{cases}
+$$
+
+
+- $D_1 \\in \\mathbb{R}^{(n-1) \\times n}$ and $D_2 \\in \\mathbb{R}^{(m-1) \\times m}$ are finite difference operators, such that the regularised TV-2D term $g(\\boldsymbol{u}) = \\lambda \\| \\boldsymbol{u} \\|_{TV} $ expressed as follows.
+
+
+$$
+- Isotropic case: $$g(\\boldsymbol{u}) = \\lambda \\| \\sqrt{ (D_1 \\boldsymbol{u})^2 + (\\boldsymbol{u}^{\top} D_2)^2 \\|_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits_{l = 1}^{m-1} \\sqrt{\\vert u_{k+1,l} - u_{k,l} \\vert^2 + \\vert u_{k,l+1} - u_{k,l} \\vert^2} $$
+- Anisotropic case: $$g(\\boldsymbol{u}) = \\lambda \\| D_1 \\boldsymbol{u} \\|_{1} + \\| \\boldsymbol{u}^{\top} D_2 \\|_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits_{l = 1}^{m-1} (\\vert u_{k+1,l} - u_{k,l} \\vert + \\vert u_{k,l+1} - u_{k,l} \\vert) $$
+$$
+
+
+where n (or height) and m (or width) stand for the dimension of targeted vector.
 
 
 Install
@@ -29,13 +45,11 @@ Apart from the problem, options can be passed to `benchopt run`, to restrict the
 
 .. code-block::
 
-	$ benchopt run benchmark_tv_2d -d deblurring --max-runs 10 --n-repetitions 10
+	$ benchopt run benchmark_tv_2d --config benchmark_tv_2d/example_config.yml
 
 
 Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/api.html.
 
-.. |Build Template| image:: https://github.com/benchopt/template_benchmark/workflows/Tests/badge.svg
-   :target: https://github.com/benchopt/template_benchmark/actions
 .. |Build Status| image:: https://github.com/benchopt/benchmark_tv_2d/workflows/Tests/badge.svg
    :target: https://github.com/benchopt/benchmark_tv_2d/actions
 .. |Python 3.6+| image:: https://img.shields.io/badge/python-3.6%2B-blue
