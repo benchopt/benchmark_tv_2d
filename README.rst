@@ -7,8 +7,8 @@ This benchmark is dedicated to solver of TV-1D regularised regression problem:
 $$\\boldsymbol{u} \\in \\underset{\\boldsymbol{u} \\in \\mathbb{R}^{n \\times m}}{\\mathrm{argmin}} f(\\boldsymbol{y}, A \\boldsymbol{u}) + g(\\boldsymbol{u})$$
 
 
-- $\\boldsymbol{y} \\in \\mathbb{R}^{n \\times m}$ is a vector of observations or targets.
-- $A \\in \\mathbb{R}^{n \\times p}$ is a design matrix or forward operator.
+- $\\boldsymbol{y} \\in \\mathbb{R}^{n \\times m}$ is observation as target vector
+- $A \\in \\mathbb{R}^{n \\times n}$ is a designed operator as an amplifier.
 - $\\lambda > 0$ is a regularization hyperparameter.
 - $f(\\boldsymbol{y}, A\\boldsymbol{u}) = \\sum\\limits_{k=1}^{n} \\sum\\limits_{l=1}^{m} l(y_{k,l}, (A\\boldsymbol{u})_{k,l})$ is a loss function, where $l$ can be quadratic loss as $l(y, x) = \\frac{1}{2} \\vert y - x \\vert_2^2$, or Huber loss $l(y, x) = h_{\\delta} (y - x)$ defined by
 
@@ -37,7 +37,7 @@ g(\\boldsymbol{u}) = \\lambda \\| D_1 \\boldsymbol{u} \\|_{1} + \\| \\boldsymbol
 $$
 
 
-where n (or `height``) and m (or `width``) stand for the dimension of targeted vector.
+where n (or height) and m (or width) stand for the dimension of targeted vector.
 
 
 Install
