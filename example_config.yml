@@ -4,8 +4,6 @@ objective:
   - TV2D[data_fit=lsq,delta=0.0,isotropy=isotropic,reg=0.02]
   - TV2D[data_fit=huber,delta=0.9,isotropy=isotropic,reg=0.02]
 dataset:
-  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=10,type_A=deblurring,type_n=gaussian]
-  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.3,subsampling=10,type_A=denoising,type_n=gaussian]
   - Deblurring[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4,type_n=gaussian]
   - Denoising[std_noise=0.3,subsampling=4,type_n=gaussian]
   - Simulated[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=4,type_A=deblurring,type_n=gaussian]
