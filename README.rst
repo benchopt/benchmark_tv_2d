@@ -55,7 +55,7 @@ Apart from the problem, options can be passed to `benchopt run`, to restrict the
 
 .. code-block::
 
-	$ benchopt run benchmark_tv_2d --config benchmark_tv_2d/example_config.yml
+	$ benchopt run benchmark_tv_2d --config benchmark_tv_2d/mini_config.yml
 
 
 Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/api.html.
