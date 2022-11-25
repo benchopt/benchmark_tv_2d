@@ -4,13 +4,11 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
-    get_l2norm = import_ctx.import_from('shared', 'get_l2norm')
-    grad_F = import_ctx.import_from('shared', 'grad_F')
-    div = import_ctx.import_from('matrix_op', 'div')
-    grad = import_ctx.import_from('matrix_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
-                                                'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
+    from benchmark_utils.shared import get_l2norm
+    from benchmark_utils.shared import grad_F
+    from benchmark_utils.matrix_op import div, grad
+    from benchmark_utils.matrix_op import dual_prox_tv_iso
+    from benchmark_utils.matrix_op import dual_prox_tv_aniso
 
 
 class Solver(BaseSolver):

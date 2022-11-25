@@ -6,11 +6,9 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from scipy.sparse.linalg import LinearOperator
     from scipy.sparse.linalg import cg
-    div = import_ctx.import_from('matrix_op', 'div')
-    grad = import_ctx.import_from('matrix_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
-                                                'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
+    from benchmark_utils.matrix_op import div, grad
+    from benchmark_utils.matrix_op import dual_prox_tv_iso
+    from benchmark_utils.matrix_op import dual_prox_tv_aniso
 
 
 class Solver(BaseSolver):
