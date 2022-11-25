@@ -3,8 +3,8 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
-    grad = import_ctx.import_from('matrix_op', 'grad')
-    huber = import_ctx.import_from('shared', 'huber')
+    from benchmark_utils.shared import huber
+    from benchmark_utils.matrix_op import grad
 
 
 class Objective(BaseObjective):

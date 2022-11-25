@@ -5,7 +5,7 @@ with safe_import_context() as import_ctx:
     import numpy as np
     from PIL import Image, ImageOps
     import download
-    make_blur = import_ctx.import_from('shared', 'make_blur')
+    from benchmark_utils.shared import make_blur
 
 
 class Dataset(BaseDataset):
