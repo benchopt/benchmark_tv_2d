@@ -7,13 +7,11 @@ with safe_import_context() as import_ctx:
     from scipy.sparse.linalg import LinearOperator
     from scipy.sparse.linalg import cg
     from scipy.optimize import minimize
-    huber = import_ctx.import_from('shared', 'huber')
-    grad_huber = import_ctx.import_from('shared', 'grad_huber')
-    div = import_ctx.import_from('matrix_op', 'div')
-    grad = import_ctx.import_from('matrix_op', 'grad')
-    dual_prox_tv_aniso = import_ctx.import_from('matrix_op',
-                                                'dual_prox_tv_aniso')
-    dual_prox_tv_iso = import_ctx.import_from('matrix_op', 'dual_prox_tv_iso')
+    from benchmark_utils.shared import huber
+    from benchmark_utils.shared import grad_huber
+    from benchmark_utils.matrix_op import div, grad
+    from benchmark_utils.matrix_op import dual_prox_tv_iso
+    from benchmark_utils.matrix_op import dual_prox_tv_aniso
 
 
 def loss(y, A, u, delta, n, m, zh, zv, muh, muv, gamma):

@@ -4,7 +4,7 @@ from benchopt import safe_import_context
 with safe_import_context() as import_ctx:
     import numpy as np
     from scipy import misc
-    make_blur = import_ctx.import_from('shared', 'make_blur')
+    from benchmark_utils.shared import make_blur
 
 
 class Dataset(BaseDataset):
