@@ -1,8 +1,8 @@
-Unidimensional Total variation (TV) Benchmark
-=============================================
+2-dimensional Total Variation (TV) Benchmark
+============================================
 |Build Status| |Python 3.6+|
 
-This benchmark is dedicated to solver of TV-1D regularised regression problem:
+This benchmark is dedicated to solver of TV-2D regularised regression problem:
 
 $$\\boldsymbol{u} \\in \\underset{\\boldsymbol{u} \\in \\mathbb{R}^{n \\times m}}{\\mathrm{argmin}} f(\\boldsymbol{y}, A \\boldsymbol{u}) + g(\\boldsymbol{u})$$
 
@@ -13,7 +13,7 @@ $$\\boldsymbol{u} \\in \\underset{\\boldsymbol{u} \\in \\mathbb{R}^{n \\times m}
 - $f(\\boldsymbol{y}, A\\boldsymbol{u}) = \\sum\\limits_{k=1}^{n} \\sum\\limits_{l=1}^{m} l(y_{k,l}, (A\\boldsymbol{u})_{k,l})$ is a loss function, where $l$ can be quadratic loss as $l(y, x) = \\frac{1}{2} \\vert y - x \\vert_2^2$, or Huber loss $l(y, x) = h_{\\delta} (y - x)$ defined by
 
 
-$$   
+$$
 h_{\\delta}(t) = \\begin{cases} \\frac{1}{2} t^2 & \\mathrm{ if } \\vert t \\vert \\le \\delta \\\\ \\delta \\vert t \\vert - \\frac{1}{2} \\delta^2 & \\mathrm{ otherwise} \\end{cases}
 $$
 
