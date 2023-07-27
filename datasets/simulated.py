@@ -59,6 +59,5 @@ class Dataset(BaseDataset):
             n = rng.laplace(0, self.std_noise, size=img.shape)
         A = self.set_A(img.shape[0])
         y_degraded = A @ img + n
-        data = dict(A=A, y=y_degraded)
 
-        return data
+        return dict(A=A, y=y_degraded)
