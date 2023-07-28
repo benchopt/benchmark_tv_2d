@@ -13,7 +13,7 @@ class Objective(BaseObjective):
 
     parameters = {'reg': [0.02],
                   'delta': [0.9],
-                  'isotropy': ["anisotropic", "isotropic", "split"],
+                  'isotropy': ["anisotropic", "isotropic"],
                   'data_fit': ["lsq", "huber"]}
 
     def __init__(self, reg=0.02, delta=0.1,

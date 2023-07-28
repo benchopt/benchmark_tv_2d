@@ -13,7 +13,6 @@ class Dataset(BaseDataset):
 
     # List of parameters to generate the datasets. The benchmark will consider
     # the cross product for each key in the dictionary.
-    # A * I + noise ~ N(mu, sigma)
     parameters = {
         'std_noise': [0.3],
         'size_blur': [27],
@@ -52,10 +51,8 @@ class Dataset(BaseDataset):
         img = (np.cumsum(rng.randn(height, width) * z, axis=1)
                [::self.subsampling, ::self.subsampling])
         if self.type_n == 'gaussian':
-            # noise ~ N(loc, scale)
             n = rng.normal(0, self.std_noise, size=img.shape)
         elif self.type_n == 'laplace':
-            # noise ~ L(loc, scale)
             n = rng.laplace(0, self.std_noise, size=img.shape)
         A = self.set_A(img.shape[0])
         y_degraded = A @ img + n
