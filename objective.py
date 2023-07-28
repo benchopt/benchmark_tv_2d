@@ -13,7 +13,7 @@ class Objective(BaseObjective):
 
     parameters = {'reg': [0.02],
                   'delta': [0.9],
-                  'isotropy': ["anisotropic", "isotropic", "split"],
+                  'isotropy': ["anisotropic", "isotropic"],
                   'data_fit': ["lsq", "huber"]}
 
     def __init__(self, reg=0.02, delta=0.1,
@@ -29,17 +29,19 @@ class Objective(BaseObjective):
         self.reg = self.reg
 
     def compute(self, u):
-        # R means "residual"
-        R = self.y - self.A @ u
+        R = self.y - self.A @ u  # residuals
+
         if self.data_fit == "lsq":
             loss = .5 * np.linalg.norm(R) ** 2
         else:
             loss = huber(R, self.delta)
+
         if self.isotropy == "isotropic":
-            penality = self.isotropic_tv_value(u)
+            penalty = self.isotropic_tv_value(u)
         else:
-            penality = self.anisotropic_tv_value(u)
-        return loss + self.reg * penality
+            penalty = self.anisotropic_tv_value(u)
+
+        return loss + self.reg * penalty
 
     def get_one_solution(self):
         return np.zeros(self.y.shape)

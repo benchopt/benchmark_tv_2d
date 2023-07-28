@@ -27,8 +27,7 @@ def grad(u):
 
 
 def dual_prox_tv_aniso(vh, vv, reg):
-    return np.clip(vh, -reg, reg), \
-        np.clip(vv, -reg, reg)
+    return np.clip(vh, -reg, reg), np.clip(vv, -reg, reg)
 
 
 def dual_prox_tv_iso(vh, vv, reg):
