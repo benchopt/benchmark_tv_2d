@@ -33,7 +33,7 @@ In anisotropic cases:
 
 
 $$
-g(\\boldsymbol{u}) = \\lambda \\| D_1 \\boldsymbol{u} \\|_{1} + \\| \\boldsymbol{u} D_2^{\\top} \\|\_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits\_{l = 1}^{m-1} (\\vert u\_{k+1,l} - u\_{k,l} \\vert + \\vert u\_{k,l+1} - u\_{k,l} \\vert)
+g(\\boldsymbol{u}) = \\lambda \\| D_1 \\boldsymbol{u} \\|_{1} + \\| \\boldsymbol{u} D_2^{\\top} \\|\_{1} = \\lambda \\sum\\limits\_{k = 1}^{n-1} \\sum\\limits\_{l = 1}^{m-1} (\\vert u\_{k+1,l} - u\_{k,l} \\vert + \\vert u\_{k,l+1} - u\_{k,l} \\vert)
 $$
 
 
