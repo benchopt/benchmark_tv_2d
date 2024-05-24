@@ -10,22 +10,22 @@ $$\\boldsymbol{u} \\in \\underset{\\boldsymbol{u} \\in \\mathbb{R}^{n \\times m}
 - $\\boldsymbol{y} \\in \\mathbb{R}^{n \\times m}$ is a vector of observations or targets.
 - $A \\in \\mathbb{R}^{n \\times n}$ is a design matrix or forward operator.
 - $\\lambda > 0$ is a regularization hyperparameter.
-- $f(\\boldsymbol{y}, A\\boldsymbol{u}) = \\sum\\limits_{k=1}^{n} \\sum\\limits_{l=1}^{m} l(y_{k,l}, (A\\boldsymbol{u})_{k,l})$ is a loss function, where $l$ can be quadratic loss as $l(y, x) = \\frac{1}{2} \\vert y - x \\vert_2^2$, or Huber loss $l(y, x) = h_{\\delta} (y - x)$ defined by
+- $f(\\boldsymbol{y}, A\\boldsymbol{u}) = \\sum\\limits\_{k=1}^{n} \\sum\\limits\_{l=1}^{m} l(y\_{k,l}, (A\\boldsymbol{u})_{k,l})$ is a loss function, where $l$ can be quadratic loss as $l(y, x) = \\frac{1}{2} \\vert y - x \\vert_2^2$, or Huber loss $l(y, x) = h\_{\\delta} (y - x)$ defined by
 
 
 $$
-h_{\\delta}(t) = \\begin{cases} \\frac{1}{2} t^2 & \\mathrm{ if } \\vert t \\vert \\le \\delta \\\\ \\delta \\vert t \\vert - \\frac{1}{2} \\delta^2 & \\mathrm{ otherwise} \\end{cases}
+h\_{\\delta}(t) = \\begin{cases} \\frac{1}{2} t^2 & \\mathrm{ if } \\vert t \\vert \\le \\delta \\\\ \\delta \\vert t \\vert - \\frac{1}{2} \\delta^2 & \\mathrm{ otherwise} \\end{cases}
 $$
 
 
-- $D_1 \\in \\mathbb{R}^{(n-1) \\times n}$ and $D_2 \\in \\mathbb{R}^{(m-1) \\times m}$ are finite difference operators, such that the regularised TV-2D term $g(\\boldsymbol{u}) = \\lambda \\| \\boldsymbol{u} \\|_{TV}$ expressed as follows.
+- $D_1 \\in \\mathbb{R}^{(n-1) \\times n}$ and $D_2 \\in \\mathbb{R}^{(m-1) \\times m}$ are finite difference operators, such that the regularised TV-2D term $g(\\boldsymbol{u}) = \\lambda \\| \\boldsymbol{u} \\|\_{TV}$ expressed as follows.
 
 
 In isotropic cases:
 
 
 $$
-g(\\boldsymbol{u}) = \\lambda \\| \\sqrt{ (D_1 \\boldsymbol{u})^2 + (\\boldsymbol{u} D_2^{\\top})^2 } \\|_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits_{l = 1}^{m-1} \\sqrt{\\vert u_{k+1,l} - u_{k,l} \\vert^2 + \\vert u_{k,l+1} - u_{k,l} \\vert^2}
+g(\\boldsymbol{u}) = \\lambda \\| \\sqrt{ (D\_1 \\boldsymbol{u})^2 + (\\boldsymbol{u} D\_2^{\\top})^2 } \\|\_{1} = \\lambda \\sum\\limits_{k = 1}^{n-1} \\sum\\limits\_{l = 1}^{m-1} \\sqrt{\\vert u_{k+1,l} - u_{k,l} \\vert^2 + \\vert u\_{k,l+1} - u\_{k,l} \\vert^2}
 $$
 
 
