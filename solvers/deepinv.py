@@ -34,6 +34,7 @@ class Solver(BaseSolver):
         y = self.y
         gamma, reg = self.gamma, self.reg
         x = y.clone().to(device)
+        x = x.unsqueeze(0)
         data_fidelity = L2()
         prior = dinv.optim.TVPrior()
 

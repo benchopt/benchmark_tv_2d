@@ -19,9 +19,9 @@ class Objective(BaseObjective):
                   'data_fit': ["lsq", "huber"]}
 
     def linop(self, x2, size=False):
+        x = torch.from_numpy(x2).unsqueeze(0)
         if not size:
-            size = x2.shape
-        x = torch.from_numpy(x2)
+            size = x.shape
         if torch.cuda.is_available():
             device = dinv.utils.get_freer_gpu()
         else:
