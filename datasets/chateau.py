@@ -3,6 +3,7 @@ from benchopt import BaseDataset, safe_import_context
 with safe_import_context() as import_ctx:
     import deepinv as dinv
     import torch
+    from benchmark_utils.shared import rgb_to_grayscale
 
 
 class Dataset(BaseDataset):
@@ -33,6 +34,6 @@ class Dataset(BaseDataset):
         )
         physics.noise_model = dinv.physics.GaussianNoise(sigma=0.2)
 
-        y = physics(x)
+        y = rgb_to_grayscale(physics(x).squeeze(0))
 
-        return dict(A=0, y=y.numpy().squeeze(0))
+        return dict(A=0, y=y.numpy())
