@@ -20,19 +20,9 @@ def div(vh, vv):
 
 
 def grad(u):
-    if u.ndim == 3:  # RGB image
-        gh = np.zeros_like(u)
-        gv = np.zeros_like(u)
-        for c in range(u.shape[0]):
-            gh[c] = np.pad(np.diff(u[c], axis=0), ((0, 1), (0, 0)), 'constant')
-            gv[c] = np.pad(np.diff(u[c], axis=1), ((0, 0), (0, 1)), 'constant')
-
-    elif u.ndim == 2:
-        gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
-        gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
-    else:
-        raise ValueError("Input array must have 2 or 3 dimensions.")
-
+    # Neumann condition
+    gh = np.pad(np.diff(u, axis=0), ((0, 1), (0, 0)), 'constant')
+    gv = np.pad(np.diff(u, axis=1), ((0, 0), (0, 1)), 'constant')
     return gh, gv
 
 
