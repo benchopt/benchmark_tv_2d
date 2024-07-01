@@ -48,6 +48,8 @@ class Solver(BaseSolver):
             x = x - gamma*data_fidelity.grad(x, y, physics)
             x = prior.prox(x,  gamma=gamma*reg)
         self.out = x.clone()
+        self.out = self.out.squeeze(0)
+        self.out = self.out.squeeze(0)
 
     def get_result(self):
-        return dict(u=self.out.numpy().squeeze(0))
+        return dict(u=self.out.numpy())
