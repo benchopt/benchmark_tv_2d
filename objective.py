@@ -13,13 +13,14 @@ class Objective(BaseObjective):
     min_benchopt_version = "1.5"
     name = "TV2D"
 
-    parameters = {'reg': [0.02],
+    parameters = {'reg': [0.1, 0.2, 0.3, 0.4],
                   'delta': [0.9],
                   'isotropy': ["anisotropic", "isotropic"],
                   'data_fit': ["lsq", "huber"]}
 
     def linop(self, x2, size=False):
         x = torch.from_numpy(x2).unsqueeze(0)
+        x = x.unsqueeze(0)
         if not size:
             size = x.shape
         if torch.cuda.is_available():
@@ -27,11 +28,13 @@ class Objective(BaseObjective):
         else:
             device = 'cpu'
         operator = dinv.physics.Inpainting(
-            tensor_size=size,
+            tensor_size=size[1:],
             mask=0.5,
             device=device
         )
-        return operator(x).numpy().squeeze(0)
+        out = operator(x).squeeze(0)
+        out = out.squeeze(0)
+        return out.numpy()
 
     def set_data(self, A, y):
         self.A = A
