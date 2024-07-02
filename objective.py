@@ -3,33 +3,49 @@ from benchopt import safe_import_context
 
 with safe_import_context() as import_ctx:
     import numpy as np
+    import torch
+    import deepinv as dinv
     from benchmark_utils.shared import huber
     from benchmark_utils.matrix_op import grad
 
 
 class Objective(BaseObjective):
-    min_benchopt_version = "1.3"
+    min_benchopt_version = "1.5"
     name = "TV2D"
 
-    parameters = {'reg': [0.02],
+    parameters = {'reg': [0.1, 0.2, 0.3, 0.4],
                   'delta': [0.9],
                   'isotropy': ["anisotropic", "isotropic"],
                   'data_fit': ["lsq", "huber"]}
 
-    def __init__(self, reg=0.02, delta=0.1,
-                 isotropy="anisotropic", data_fit="lsq"):
-        self.reg = reg
-        self.delta = delta
-        self.isotropy = isotropy
-        self.data_fit = data_fit
+    def linop(self, x2, size=False):
+        x = torch.from_numpy(x2).unsqueeze(0)
+        x = x.unsqueeze(0)
+        if not size:
+            size = x.shape
+        if torch.cuda.is_available():
+            device = dinv.utils.get_freer_gpu()
+        else:
+            device = 'cpu'
+        operator = dinv.physics.Inpainting(
+            tensor_size=size[1:],
+            mask=0.5,
+            device=device
+        )
+        out = operator(x).squeeze(0)
+        out = out.squeeze(0)
+        return out.numpy()
 
     def set_data(self, A, y):
         self.A = A
         self.y = y
         self.reg = self.reg
 
-    def compute(self, u):
-        R = self.y - self.A @ u  # residuals
+    def evaluate_result(self, u):
+        if self.A != 0:
+            R = self.y - self.A @ u  # residuals
+        else:
+            R = self.y - self.linop(u)
 
         if self.data_fit == "lsq":
             loss = .5 * np.linalg.norm(R) ** 2
@@ -43,7 +59,7 @@ class Objective(BaseObjective):
 
         return loss + self.reg * penalty
 
-    def get_one_solution(self):
+    def get_one_result(self):
         return np.zeros(self.y.shape)
 
     def get_objective(self):
