@@ -80,4 +80,6 @@ def rgb_to_grayscale(rgb_tensor):
     grayscale_tensor = torch.tensordot(rgb_tensor.permute(1, 2, 0),
                                        transform, dims=1)
 
+    grayscale_tensor = grayscale_tensor.unsqueeze(0)
+
     return grayscale_tensor

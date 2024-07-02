@@ -26,14 +26,14 @@ class Dataset(BaseDataset):
             "chateau-azay-le-rideau.jpg?download=true"
         )
         x = dinv.utils.load_url_image(url=url, img_size=100).to(device)
-        tensor_size = x.shape[1:]
+        x_gray = rgb_to_grayscale(x.squeeze(0)).unsqueeze(0)
         physics = dinv.physics.Inpainting(
-            tensor_size=tensor_size,
+            tensor_size=x_gray.shape[1:],
             mask=0.5,
             device=device
         )
         physics.noise_model = dinv.physics.GaussianNoise(sigma=0.2)
 
-        y = rgb_to_grayscale(physics(x).squeeze(0))
+        y = physics(x_gray).squeeze(0)
 
-        return dict(A=0, y=y.numpy())
+        return dict(A=0, y=y.squeeze(0).numpy())

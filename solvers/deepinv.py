@@ -10,14 +10,14 @@ class Solver(BaseSolver):
     name = 'deepinv'
 
     parameters = {
-        'reg': [0.1],
-        'gamma': [1],
         'recon': ['TV', 'DRUNet']
     }
 
     def skip(self, A, reg, delta, data_fit, y, isotropy):
         if data_fit == 'huber':
-            return True, "solver does not work with huber loss"
+            return True, f"solver does not work with {data_fit} loss"
+        elif isotropy == 'anisotropic':
+            return True, f"solver does not work with {isotropy} regularization"
         return False, None
 
     def set_objective(self, A, reg, delta, data_fit, y, isotropy):
@@ -32,8 +32,9 @@ class Solver(BaseSolver):
             device = 'cpu'
 
         y = self.y
-        gamma, reg = self.gamma, self.reg
+        reg = self.reg
         x = y.clone().to(device)
+        x = x.unsqueeze(0)
         x = x.unsqueeze(0)
         data_fidelity = L2()
         if self.recon == 'TV':
@@ -45,17 +46,17 @@ class Solver(BaseSolver):
             prior = dinv.optim.PnP(denoiser=denoiser)
 
         physics = dinv.physics.Inpainting(
-            tensor_size=x.shape,
+            tensor_size=x.shape[1:],
             mask=0.5,
             device=device
         )
         physics.noise_model = dinv.physics.GaussianNoise(sigma=0.2)
         for _ in range(n_iter):
-            x = x - gamma*data_fidelity.grad(x, y, physics)
+            x = x - data_fidelity.grad(x, y, physics)
             if self.recon == 'TV':
-                x = prior.prox(x,  gamma=gamma*reg)
+                x = prior.prox(x,  gamma=reg)
             elif self.recon == 'DRUNet':
-                x = denoiser(x, gamma*reg)
+                x = denoiser(x, reg)
         self.out = x.clone()
         self.out = self.out.squeeze(0)
         self.out = self.out.squeeze(0)
