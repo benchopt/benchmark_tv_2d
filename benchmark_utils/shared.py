@@ -15,7 +15,7 @@ def get_l2norm(A, n_iter=100):
     return norm_x
 
 
-def make_blur(type_A, height, size=27, std=8):
+def make_blur(type_A, height, size=27, std=8, mask=None):
     if type_A == 'denoising':
         A = LinearOperator(
             dtype=np.float64,
@@ -36,6 +36,37 @@ def make_blur(type_A, height, size=27, std=8):
             matmat=lambda X: fftconvolve(X, filt, mode='same'),
             rmatvec=lambda x: fftconvolve(x, filt, mode='same'),
             rmatmat=lambda X: fftconvolve(X, filt, mode='same'),
+            shape=(height, height),
+        )
+
+    elif type_A == 'inpainting':
+        if mask is None:
+            raise ValueError("missing mask for inpainting.")
+
+        def inpaint(x):
+            x = x.reshape((int(np.sqrt(height)), int(np.sqrt(height))))
+            x_inpainted = x.copy()
+            missing = np.where(mask == 0)
+            for i, j in zip(*missing):
+                neighbors = []
+                if i > 0:
+                    neighbors.append(x[i-1, j])
+                if i < x.shape[0] - 1:
+                    neighbors.append(x[i+1, j])
+                if j > 0:
+                    neighbors.append(x[i, j-1])
+                if j < x.shape[1] - 1:
+                    neighbors.append(x[i, j+1])
+                if neighbors:
+                    x_inpainted[i, j] = np.mean(neighbors)
+            return x_inpainted.flatten()
+
+        A = LinearOperator(
+            dtype=np.float64,
+            matvec=inpaint,
+            matmat=lambda X: np.apply_along_axis(inpaint, 0, X),
+            rmatvec=inpaint,
+            rmatmat=lambda X: np.apply_along_axis(inpaint, 0, X),
             shape=(height, height),
         )
     return A
