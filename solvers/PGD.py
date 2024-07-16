@@ -1,6 +1,5 @@
 from benchopt import BaseSolver
 from benchopt import safe_import_context
-from benchopt.stopping_criterion import SufficientDescentCriterion
 
 with safe_import_context() as import_ctx:
     import numpy as np
@@ -18,9 +17,7 @@ class Solver(BaseSolver):
     # We need blas devel to get the include file for BLAS/LAPACK operations
     requirements = ["blas-devel", 'pip:prox-tv']
 
-    stopping_criterion = SufficientDescentCriterion(
-        patience=3, strategy='callback'
-    )
+    sampling_strategy = "callback"
 
     parameters = {'prox_tv_method': [
         "dr",
