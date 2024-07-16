@@ -5,7 +5,7 @@ objective:
   - TV2D[data_fit=huber,delta=0.9,isotropy=isotropic,reg=0.02]
 dataset:
   - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.02,subsampling=10,type_A=deblurring,type_n=[gaussian, laplace]]
-  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.3,subsampling=10,type_A=denoising,type_n=[gaussian, laplace]
+  - Cartoon[size_blur=27,std_blur=2.0,std_noise=0.3,subsampling=10,type_A=denoising,type_n=[gaussian, laplace]]
 solver:
   - ADMM[gamma=0.1]
   - Chambolle-Pock PD-split[eta=1.0,ratio=10.0]

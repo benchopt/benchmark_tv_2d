@@ -44,7 +44,7 @@ class Solver(BaseSolver):
         sigma_w = 1.0 / (self.ratio * LA)
         # Init variables
         n, m = self.y.shape
-        u = np.zeros((n, m))
+        self.u = u = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
         w = np.zeros((n, m))
@@ -54,7 +54,7 @@ class Solver(BaseSolver):
             'isotropic': dual_prox_tv_iso,
         }.get(self.isotropy, dual_prox_tv_aniso)
 
-        while callback(u):
+        while callback():
             u_old = u
             gh, gv = grad(u_bar)
             vh, vv = proj(vh + sigma_v * gh,
@@ -73,7 +73,7 @@ class Solver(BaseSolver):
             # grad.T = -div, hence + sign
             u = u + tau * div(vh, vv) - tau * self.A.T @ w
             u_bar = u + self.eta * (u - u_old)
-        self.u = u
+            self.u = u
 
     def get_result(self):
-        return self.u
+        return dict(u=self.u)

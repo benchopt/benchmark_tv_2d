@@ -57,7 +57,7 @@ class Solver(BaseSolver):
     def run(self, callback):
         n, m = self.y.shape
         # initialisation
-        u = np.zeros((n, m))
+        self.u = u = np.zeros((n, m))
         zh = np.zeros((n, m))  # we consider non-cyclic finite difference
         zv = np.zeros((n, m))
         muh = np.zeros((n, m))  # we consider non-cyclic finite difference
@@ -79,7 +79,7 @@ class Solver(BaseSolver):
                                       self.A @ x.reshape((n, m)))
                                   - gamma * div(grad(x.reshape((n, m)))[0],
                                                 grad(x.reshape((n, m)))[1]))
-        while callback(u):
+        while callback():
             if self.data_fit == 'lsq':
                 u_tmp = (Aty + div(muh, muv) - gamma * div(zh, zv)).flatten()
                 u, _ = cg(AtA_gDtD, u_tmp, x0=u.flatten(), tol=tol_cg)
@@ -105,7 +105,7 @@ class Solver(BaseSolver):
             zv = (gv * gamma + muv - zv) / gamma
             muh += gamma * (gh - zh)
             muv += gamma * (gv - zv)
-        self.u = u
+            self.u = u
 
     def get_result(self):
-        return self.u
+        return dict(u=self.u)
