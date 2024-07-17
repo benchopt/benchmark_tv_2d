@@ -44,7 +44,8 @@ class Solver(BaseSolver):
     def run(self, callback):
         n, m = self.y.shape
         # initialisation
-        self.u = u = np.zeros((n, m))
+        u = np.zeros((n, m))
+        self.u = np.zeros((n, m))
         v = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))

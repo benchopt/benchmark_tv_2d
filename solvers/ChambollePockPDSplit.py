@@ -44,7 +44,8 @@ class Solver(BaseSolver):
         sigma_w = 1.0 / (self.ratio * LA)
         # Init variables
         n, m = self.y.shape
-        self.u = u = np.zeros((n, m))
+        u = np.zeros((n, m))
+        self.u = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
         w = np.zeros((n, m))

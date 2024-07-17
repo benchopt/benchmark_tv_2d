@@ -44,7 +44,8 @@ class Solver(BaseSolver):
         tau = 1 / (LA ** 2 / 2 + sigma_v * LD ** 2)
         eta = self.eta
         # initialisation
-        self.u = u = np.zeros((n, m))
+        u = np.zeros((n, m))
+        self.u = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
         proj = {
