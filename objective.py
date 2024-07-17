@@ -8,27 +8,21 @@ with safe_import_context() as import_ctx:
 
 
 class Objective(BaseObjective):
-    min_benchopt_version = "1.3"
+    min_benchopt_version = "1.5"
     name = "TV2D"
 
-    parameters = {'reg': [0.02],
-                  'delta': [0.9],
-                  'isotropy': ["anisotropic", "isotropic"],
-                  'data_fit': ["lsq", "huber"]}
-
-    def __init__(self, reg=0.02, delta=0.1,
-                 isotropy="anisotropic", data_fit="lsq"):
-        self.reg = reg
-        self.delta = delta
-        self.isotropy = isotropy
-        self.data_fit = data_fit
+    parameters = {
+        'reg': [0.02],
+        'delta': [0.9],
+        'isotropy': ["anisotropic", "isotropic"],
+        'data_fit': ["lsq", "huber"]
+    }
 
     def set_data(self, A, y):
         self.A = A
         self.y = y
-        self.reg = self.reg
 
-    def compute(self, u):
+    def evaluate_result(self, u):
         R = self.y - self.A @ u  # residuals
 
         if self.data_fit == "lsq":
@@ -43,8 +37,8 @@ class Objective(BaseObjective):
 
         return loss + self.reg * penalty
 
-    def get_one_solution(self):
-        return np.zeros(self.y.shape)
+    def get_one_result(self):
+        return dict(u=np.zeros(self.y.shape))
 
     def get_objective(self):
         return dict(A=self.A,

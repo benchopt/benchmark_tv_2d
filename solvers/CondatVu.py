@@ -45,6 +45,7 @@ class Solver(BaseSolver):
         eta = self.eta
         # initialisation
         u = np.zeros((n, m))
+        self.u = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
         proj = {
@@ -52,7 +53,7 @@ class Solver(BaseSolver):
             'isotropic': dual_prox_tv_iso,
         }.get(self.isotropy, dual_prox_tv_aniso)
 
-        while callback(u):
+        while callback():
             u_tmp = (u - tau * grad_F(self.y, self.A, u,
                                       self.data_fit, self.delta)
                      + tau * div(vh, vv))
@@ -63,7 +64,7 @@ class Solver(BaseSolver):
             u = eta * u_tmp + (1 - eta) * u
             vh = eta * vh_tmp + (1 - eta) * vh
             vv = eta * vv_tmp + (1 - eta) * vv
-        self.u = u
+            self.u = u
 
     def get_result(self):
-        return self.u
+        return dict(u=self.u)

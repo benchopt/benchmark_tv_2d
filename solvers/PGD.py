@@ -17,7 +17,7 @@ class Solver(BaseSolver):
     # We need blas devel to get the include file for BLAS/LAPACK operations
     requirements = ["blas-devel", 'pip:prox-tv']
 
-    stopping_strategy = "callback"
+    sampling_strategy = "callback"
 
     parameters = {'prox_tv_method': [
         "dr",
@@ -44,11 +44,12 @@ class Solver(BaseSolver):
         n, m = self.y.shape
         stepsize = 1. / (get_l2norm(self.A) ** 2)
         u = np.zeros((n, m))
+        self.u = np.zeros((n, m))
         u_acc = u.copy()
         u_old = u.copy()
 
         t_new = 1
-        while callback(u):
+        while callback():
             if self.use_acceleration:
                 t_old = t_new
                 t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
@@ -60,7 +61,7 @@ class Solver(BaseSolver):
                 self.reg * stepsize, method=self.prox_tv_method)
             if self.use_acceleration:
                 u_acc[:] = u + (t_old - 1.) / t_new * (u - u_old)
-        self.u = u
+            self.u = u
 
     def get_result(self):
-        return self.u
+        return dict(u=self.u)
