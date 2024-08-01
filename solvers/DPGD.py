@@ -81,7 +81,7 @@ class Solver(BaseSolver):
                 vv[:] = vv_acc
 
             v_tmp = (Aty + div(vh, vv)).flatten()
-            v, _ = cg(AtA, v_tmp, x0=v.flatten(), tol=tol_cg)
+            v, _ = cg(AtA, v_tmp, x0=v.flatten(), rtol=tol_cg)
             v = v.reshape((n, m))
             gh, gv = grad(v)
             vh, vv = proj(vh + sigma_v * gh,
@@ -94,7 +94,7 @@ class Solver(BaseSolver):
                 vv_acc[:] = vv + (t_old - 1.) / t_new * (vv - vv_old)
 
             u_tmp = (Aty + div(vh, vv)).flatten()
-            u, _ = cg(AtA, u_tmp, x0=u.flatten(), tol=tol_cg)
+            u, _ = cg(AtA, u_tmp, x0=u.flatten(), rtol=tol_cg)
             u = u.reshape((n, m))
             self.u = u
 

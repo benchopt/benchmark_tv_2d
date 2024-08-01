@@ -83,7 +83,7 @@ class Solver(BaseSolver):
         while callback():
             if self.data_fit == 'lsq':
                 u_tmp = (Aty + div(muh, muv) - gamma * div(zh, zv)).flatten()
-                u, _ = cg(AtA_gDtD, u_tmp, x0=u.flatten(), tol=tol_cg)
+                u, _ = cg(AtA_gDtD, u_tmp, x0=u.flatten(), rtol=tol_cg)
             elif self.data_fit == 'huber':
 
                 def func(u):
