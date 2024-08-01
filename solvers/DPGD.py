@@ -45,6 +45,7 @@ class Solver(BaseSolver):
         n, m = self.y.shape
         # initialisation
         u = np.zeros((n, m))
+        self.u = u.copy()
         v = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
@@ -54,7 +55,7 @@ class Solver(BaseSolver):
         Aty = self.A.T @ self.y
         AtA = LinearOperator(shape=(n * m, n * m),
                              matvec=lambda x: self.A.T @ (
-                                self.A @ x.reshape((n, m))))
+            self.A @ x.reshape((n, m))))
         proj = {
             'anisotropic': dual_prox_tv_aniso,
             'isotropic': dual_prox_tv_iso,
@@ -68,7 +69,7 @@ class Solver(BaseSolver):
         vv_acc = vv.copy()
 
         t_new = 1
-        while callback(u):
+        while callback():
             if self.use_acceleration:
                 t_old = t_new
                 t_new = (1 + np.sqrt(1 + 4 * t_old ** 2)) / 2
@@ -95,7 +96,7 @@ class Solver(BaseSolver):
             u_tmp = (Aty + div(vh, vv)).flatten()
             u, _ = cg(AtA, u_tmp, x0=u.flatten(), tol=tol_cg)
             u = u.reshape((n, m))
-        self.u = u
+            self.u = u
 
     def get_result(self):
-        return self.u
+        return dict(u=self.u)
