@@ -45,7 +45,7 @@ class Solver(BaseSolver):
         eta = self.eta
         # initialisation
         u = np.zeros((n, m))
-        self.u = u.copy()
+        self.u = np.zeros((n, m))
         vh = np.zeros((n, m))  # we consider non-cyclic finite difference
         vv = np.zeros((n, m))
         proj = {

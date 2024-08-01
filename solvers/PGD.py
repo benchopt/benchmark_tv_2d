@@ -44,7 +44,7 @@ class Solver(BaseSolver):
         n, m = self.y.shape
         stepsize = 1. / (get_l2norm(self.A) ** 2)
         u = np.zeros((n, m))
-        self.u = u.copy()
+        self.u = np.zeros((n, m))
         u_acc = u.copy()
         u_old = u.copy()
 

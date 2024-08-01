@@ -19,7 +19,7 @@ solver:
   - Primal PGD[prox_tv_method=condat,use_acceleration=True]
   - Primal PGD[prox_tv_method=chambolle-pock,use_acceleration=True]
   - Primal PGD[prox_tv_method=kolmogorov,use_acceleration=True]
-  - sporco
+#  - sporco
 
 n-repetitions: 1
 timeout: 200
