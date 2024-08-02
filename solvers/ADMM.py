@@ -59,6 +59,7 @@ class Solver(BaseSolver):
         # initialisation
         self.u = np.zeros((n, m))
         u = np.zeros((n, m))
+        self.u = u.copy()
         zh = np.zeros((n, m))  # we consider non-cyclic finite difference
         zv = np.zeros((n, m))
         muh = np.zeros((n, m))  # we consider non-cyclic finite difference
