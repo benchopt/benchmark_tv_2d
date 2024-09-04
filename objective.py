@@ -11,6 +11,8 @@ class Objective(BaseObjective):
     min_benchopt_version = "1.5"
     name = "TV2D"
 
+    requirements = ["scipy"]
+
     parameters = {'reg': [0.02],
                   'delta': [0.9],
                   'isotropy': ["anisotropic", "isotropic"],
