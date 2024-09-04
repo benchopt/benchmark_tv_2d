@@ -13,7 +13,7 @@ class Dataset(BaseDataset):
     name = "Cartoon"
 
     install_cmd = 'conda'
-    requirements = ['pip:download']
+    requirements = ['pip::download']
 
     # List of parameters to generate the datasets. The benchmark will consider
     # the cross product for each key in the dictionary.
