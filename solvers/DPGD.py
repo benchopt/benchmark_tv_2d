@@ -18,7 +18,6 @@ class Solver(BaseSolver):
     # atol/rtol params of scipy.sparse.linalg.cg need scipy 1.14
     requirements = ["scipy>=1.14"]
 
-
     stopping_criterion = SufficientDescentCriterion(
         patience=3, strategy="callback"
     )
