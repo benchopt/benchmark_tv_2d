@@ -13,10 +13,12 @@ class Objective(BaseObjective):
 
     requirements = ["scipy"]
 
-    parameters = {'reg': [0.02],
-                  'delta': [0.9],
-                  'isotropy': ["anisotropic", "isotropic"],
-                  'data_fit': ["lsq", "huber"]}
+    parameters = {
+        'reg': [0.02],
+        'delta': [0.9],
+        'isotropy': ["anisotropic", "isotropic"],
+        'data_fit': ["lsq", "huber"],
+    }
 
     def __init__(self, reg=0.02, delta=0.1,
                  isotropy="anisotropic", data_fit="lsq"):
@@ -28,7 +30,6 @@ class Objective(BaseObjective):
     def set_data(self, A, y):
         self.A = A
         self.y = y
-        self.reg = self.reg
 
     def evaluate_result(self, u):
         R = self.y - self.A @ u  # residuals

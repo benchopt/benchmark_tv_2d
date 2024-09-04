@@ -15,9 +15,9 @@ class Solver(BaseSolver):
 
     install_cmd = 'conda'
     # We need blas devel to get the include file for BLAS/LAPACK operations
-    requirements = ["blas-devel", 'pip:prox-tv']
+    requirements = ["blas-devel", 'pip::prox-tv']
 
-    stopping_strategy = "callback"
+    sampling_strategy = "callback"
 
     parameters = {'prox_tv_method': [
         "dr",
