@@ -11,12 +11,21 @@ class Objective(BaseObjective):
     min_benchopt_version = "1.5"
     name = "TV2D"
 
+    requirements = ["scipy"]
+
     parameters = {
         'reg': [0.02],
         'delta': [0.9],
         'isotropy': ["anisotropic", "isotropic"],
-        'data_fit': ["lsq", "huber"]
+        'data_fit': ["lsq", "huber"],
     }
+
+    def __init__(self, reg=0.02, delta=0.1,
+                 isotropy="anisotropic", data_fit="lsq"):
+        self.reg = reg
+        self.delta = delta
+        self.isotropy = isotropy
+        self.data_fit = data_fit
 
     def set_data(self, A, y):
         self.A = A

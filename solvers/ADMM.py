@@ -35,6 +35,8 @@ def jac_loss(y, A, u, delta, n, m, zh, zv, muh, muv, gamma):
 class Solver(BaseSolver):
     """Alternating direction method."""
     name = 'ADMM'
+    # atol/rtol params of scipy.sparse.linalg.cg need scipy 1.14
+    requirements = ["scipy>=1.14"]
 
     stopping_criterion = SufficientDescentCriterion(
         patience=3, strategy='callback'
@@ -59,6 +61,7 @@ class Solver(BaseSolver):
         # initialisation
         self.u = np.zeros((n, m))
         u = np.zeros((n, m))
+        self.u = u.copy()
         zh = np.zeros((n, m))  # we consider non-cyclic finite difference
         zv = np.zeros((n, m))
         muh = np.zeros((n, m))  # we consider non-cyclic finite difference
@@ -83,7 +86,7 @@ class Solver(BaseSolver):
         while callback():
             if self.data_fit == 'lsq':
                 u_tmp = (Aty + div(muh, muv) - gamma * div(zh, zv)).flatten()
-                u, _ = cg(AtA_gDtD, u_tmp, x0=u.flatten(), tol=tol_cg)
+                u, _ = cg(AtA_gDtD, u_tmp, x0=u.flatten(), atol=tol_cg)
             elif self.data_fit == 'huber':
 
                 def func(u):
