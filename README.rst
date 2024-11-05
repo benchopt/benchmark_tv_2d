@@ -10,7 +10,7 @@ $$\\boldsymbol{u} \\in \\underset{\\boldsymbol{u} \\in \\mathbb{R}^{n \\times m}
 - $\\boldsymbol{y} \\in \\mathbb{R}^{n \\times m}$ is a vector of observations or targets.
 - $A \\in \\mathbb{R}^{n \\times n}$ is a design matrix or forward operator.
 - $\\lambda > 0$ is a regularization hyperparameter.
-- $f(\\boldsymbol{y}, A\\boldsymbol{u}) = \\sum\\limits\_{k=1}^{n} \\sum\\limits\_{l=1}^{m} l(y\_{k,l}, (A\\boldsymbol{u})_{k,l})$ is a loss function, where $l$ can be quadratic loss as $l(y, x) = \\frac{1}{2} \\vert y - x \\vert_2^2$, or Huber loss $l(y, x) = h\_{\\delta} (y - x)$ defined by
+- the datafit is $f(\\boldsymbol{y},A\\boldsymbol{u})=\\sum\_{k=1}^{n}\\sum\_{l=1}^{m} l(y\_{k,l}, (A\\boldsymbol{u}))_{k,l}$, where $l$ can either be the quadratic loss $l(y, x) = \\frac{1}{2} \\vert y - x \\vert_2^2$, or the Huber loss $l(y, x) = h\_{\\delta} (y - x)$ defined by
 
 
 $$
@@ -37,28 +37,24 @@ g(\\boldsymbol{u}) = \\lambda \\| D_1 \\boldsymbol{u} \\|_{1} + \\| \\boldsymbol
 $$
 
 
-where n (or `height`) and m (or `width`) stand for the dimension of targeted vector.
+where n (or `height`) and m (or `width`) are the dimensions of the image.
 
+The type of loss is controlled by the ``data_fit`` attribute of the Objective.
 
 Install
 --------
 
-This benchmark can be run using the following commands:
+A simple version of this benchmark can be run using the following commands:
 
 .. code-block::
 
    $ pip install -U benchopt
    $ git clone https://github.com/benchopt/benchmark_tv_2d
-   $ benchopt run benchmark_tv_2d
+   $ cd benchmark_tv_2d
+   $ benchopt install --config example_config.yml
+   $ benchopt run --config example_config.yml
 
-Apart from the problem, options can be passed to `benchopt run`, to restrict the benchmarks to some solvers or datasets, e.g.:
-
-.. code-block::
-
-	$ benchopt run benchmark_tv_2d --config benchmark_tv_2d/example_config.yml
-
-
-Use `benchopt run -h` for more details about these options, or visit https://benchopt.github.io/api.html.
+To run the benchmark on a limited subset of Objectives, Solvers or Datasets, visit https://benchopt.github.io/api.html or use the command ```benchopt run -h``.
 
 .. |Build Status| image:: https://github.com/benchopt/benchmark_tv_2d/workflows/Tests/badge.svg
    :target: https://github.com/benchopt/benchmark_tv_2d/actions
